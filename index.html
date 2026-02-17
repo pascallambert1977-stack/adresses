@@ -2,170 +2,153 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Mon Carnet d'Adresses Personnalisable</title>
+<title>Mon Carnet Pourpre</title>
 <style>
-
-        /* Variables de couleurs qui changeront dynamiquement */
 
         :root {
 
-            --primary: #4169E1;
+            --primary: #800080; 
 
-            --bg: #f8f9fa;
+            --bg: #fdfafc;
 
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); max-width: 800px; margin: 0 auto; padding: 20px; color: #333; transition: 0.3s; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
 
-        .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(128,0,128,0.08); border: 1px solid #eee; }
 
-        h1 { color: var(--primary); text-align: center; margin-bottom: 30px; }
+        h1 { color: var(--primary); text-align: center; font-variant: small-caps; }
 
-        h2 { font-size: 1.1em; color: #444; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        h2 { font-size: 1.1em; color: #444; border-left: 4px solid var(--primary); padding-left: 10px; margin-bottom: 15px; }
 
-        /* Style des contrôles */
+        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-size: 16px; border-radius: 10px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
+
+        .btn:hover { filter: brightness(1.2); }
+
+        .btn-alt { background: #4a4a4a; font-size: 0.8em; margin-top: 5px; }
+
+        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        .badge { background: #f3e5f5; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
 
         label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.85em; color: #666; }
 
-        select, input { width: 100%; padding: 12px; margin-top: 5px; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1em; outline: none; transition: 0.2s; }
+        select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
 
-        select:focus, input:focus { border-color: var(--primary); }
+        .delete-btn { color: #ff4d4d; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.75em; float: right; }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; cursor: pointer; font-size: 16px; border-radius: 10px; margin-top: 10px; font-weight: bold; transition: transform 0.1s, opacity 0.2s; }
-
-        .btn:active { transform: scale(0.98); }
-
-        /* Boutons de partage */
-
-        .share-group { display: flex; gap: 10px; margin-top: 10px; }
-
-        .btn-alt { background: #6c757d; font-size: 0.8em; }
-
-        /* Résultats */
-
-        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
-
-        .badge { background: #f0f2ff; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
-
-        .map-link { display: inline-block; margin-top: 10px; color: var(--primary); text-decoration: none; font-weight: bold; }
-
-        .delete-btn { color: #ff4d4d; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.7em; float: right; }
+        .map-link { color: var(--primary); font-weight: bold; text-decoration: none; display: inline-block; margin-top: 10px; }
 </style>
 </head>
 <body>
-<div style="text-align: right; margin-bottom: 10px;">
-<label style="display:inline; margin-right:10px;">Couleur du thème :</label>
-<input type="color" id="themeColor" value="#4169E1" onchange="changerCouleur(this.value)" style="width: 50px; height: 30px; padding: 2px; vertical-align: middle; cursor: pointer;">
-</div>
-<h1>📍 Mes Bonnes Adresses</h1>
-<div class="card" style="background: #fffdf5; border-color: #ffeeb8;">
-<h2>📤 Partager la liste</h2>
-<div class="share-group">
-<button class="btn btn-alt" onclick="exporterDonnees()">💾 Créer un fichier de sauvegarde</button>
-<button class="btn btn-alt" onclick="document.getElementById('fileIn').click()">📂 Charger un fichier reçu</button>
+<h1>🔮 Mon Explorateur Pourpre</h1>
+<div class="card" style="background: #fdf5ff;">
+<h2>📤 Échange de données</h2>
+<div style="display: flex; gap: 10px;">
+<button class="btn btn-alt" onclick="exporterDonnees()">💾 Sauvegarder (JSON)</button>
+<button class="btn btn-alt" onclick="document.getElementById('fileIn').click()">📂 Charger un fichier</button>
 </div>
 <input type="file" id="fileIn" style="display:none" onchange="importerDonnees(event)">
 </div>
 <div class="card">
-<h2>🔍 Filtrer par zone</h2>
-<select id="filterZone" onchange="afficherLieux()">
-<option value="tous">🌍 Toutes les adresses</option>
-<option value="bx">🇧🇪 Bruxelles uniquement</option>
-<option value="hors">🚗 Hors Bruxelles</option>
+<h2>🔍 Trouver un lieu</h2>
+<label>Rechercher par nom :</label>
+<input type="text" id="searchName" placeholder="Ex: Belga..." onkeyup="rechercher()">
+<label>Zone :</label>
+<select id="searchZone" onchange="rechercher()">
+<option value="tous">Toutes les zones</option>
+<option value="bx">Bruxelles</option>
+<option value="hors">Hors Bruxelles</option>
 </select>
+<div id="searchCityBox" style="display:none;">
+<label>Ville précise :</label>
+<input type="text" id="searchCity" placeholder="Ex: Namur, Liège..." onkeyup="rechercher()">
+</div>
 </div>
 <div id="displayArea"></div>
 <div class="card" style="border-top: 6px solid #FFD700;">
 <h2>➕ Ajouter une adresse</h2>
-<label>Nom :</label>
-<input type="text" id="addName" placeholder="Ex: Belga Queen">
-<label>Type de lieu :</label>
+<label>Nom de l'établissement :</label>
+<input type="text" id="addName">
+<label>Type :</label>
 <select id="addType">
-<option value="☕ Café">☕ Café</option>
-<option value="🍴 Restaurant">🍴 Restaurant</option>
-<option value="🏨 Hôtel">🏨 Hôtel</option>
-<option value="🎭 Culture">🎭 Culture / Autre</option>
+<option value="☕ Café">Café</option>
+<option value="🍴 Restaurant">Restaurant</option>
+<option value="🏨 Hôtel">Hôtel</option>
+<option value="🎭 Culture">Autre</option>
 </select>
-<label>Localisation :</label>
-<select id="addIsBx" onchange="toggleAddZone()">
-<option value="oui">Bruxelles</option>
-<option value="non">Hors Bruxelles</option>
+<label>C'est à Bruxelles ?</label>
+<select id="addIsBx" onchange="toggleFormAdd()">
+<option value="oui">Oui</option>
+<option value="non">Non (Ailleurs)</option>
 </select>
-<div id="addBxZone">
-<label>Commune bruxelloise :</label>
+<div id="addBoxBx">
+<label>Commune :</label>
 <select id="addCommune"></select>
 </div>
-<div id="addHorsZone" style="display:none">
+<div id="addBoxHors" style="display:none">
 <label>Ville :</label>
-<input type="text" id="addCity" placeholder="Ex: Namur">
+<input type="text" id="addCity" placeholder="Ex: Waterloo">
 </div>
 <label>Adresse :</label>
 <input type="text" id="addAddr" placeholder="Rue et numéro">
-<button class="btn" onclick="ajouterLieu()">Enregistrer l'adresse</button>
+<button class="btn" onclick="ajouterLieu()">Enregistrer dans ma liste</button>
 </div>
 <script>
 
         const communes = ["Anderlecht", "Auderghem", "Berchem-Sainte-Agathe", "Bruxelles-Ville", "Etterbeek", "Evere", "Forest", "Ganshoren", "Ixelles", "Jette", "Koekelberg", "Molenbeek-Saint-Jean", "Saint-Gilles", "Saint-Josse-ten-Noode", "Schaerbeek", "Uccle", "Watermael-Boitsfort", "Woluwe-Saint-Lambert", "Woluwe-Saint-Pierre"];
 
-        let lieux = JSON.parse(localStorage.getItem('monCarnetV4')) || [];
-
-        let maCouleur = localStorage.getItem('monThemeV4') || '#4169E1';
+        let database = JSON.parse(localStorage.getItem('monCarnetV5')) || [];
 
         window.onload = function() {
-
-            // Initialiser couleur
-
-            changerCouleur(maCouleur);
-
-            document.getElementById('themeColor').value = maCouleur;
-
-            // Remplir les communes
 
             const sel = document.getElementById('addCommune');
 
             communes.sort().forEach(c => sel.add(new Option(c, c)));
 
-            afficherLieux();
+            rechercher();
 
         };
 
-        function changerCouleur(val) {
-
-            document.documentElement.style.setProperty('--primary', val);
-
-            localStorage.setItem('monThemeV4', val);
-
-        }
-
-        function toggleAddZone() {
+        function toggleFormAdd() {
 
             const isBx = document.getElementById('addIsBx').value === 'oui';
 
-            document.getElementById('addBxZone').style.display = isBx ? 'block' : 'none';
+            document.getElementById('addBoxBx').style.display = isBx ? 'block' : 'none';
 
-            document.getElementById('addHorsZone').style.display = isBx ? 'none' : 'block';
+            document.getElementById('addBoxHors').style.display = isBx ? 'none' : 'block';
 
         }
 
-        function afficherLieux() {
+        function rechercher() {
 
-            const filtre = document.getElementById('filterZone').value;
+            const zone = document.getElementById('searchZone').value;
+
+            const cityFilter = document.getElementById('searchCity').value.toLowerCase();
+
+            const nameFilter = document.getElementById('searchName').value.toLowerCase();
 
             const container = document.getElementById('displayArea');
 
+            // Afficher ou cacher la barre de ville selon la zone choisie
+
+            document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
+
             container.innerHTML = "";
 
-            const listeFiltrée = lieux.filter(l => {
+            const filtered = database.filter(l => {
 
-                if(filtre === 'bx') return l.isBx;
+                const matchZone = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
 
-                if(filtre === 'hors') return !l.isBx;
+                const matchCity = (zone !== 'hors') || l.city.toLowerCase().includes(cityFilter);
 
-                return true;
+                const matchName = l.name.toLowerCase().includes(nameFilter);
+
+                return matchZone && matchCity && matchName;
 
             });
 
-            listeFiltrée.forEach(l => {
+            filtered.forEach(l => {
 
                 const ville = l.isBx ? l.commune : l.city;
 
@@ -175,9 +158,9 @@
 <div class="result-item">
 <button class="delete-btn" onclick="supprimer(${l.id})">Supprimer</button>
 <span class="badge">${l.type}</span>
-<h3 style="margin: 10px 0 5px 0;">${l.name}</h3>
-<p style="margin:0; font-size:0.9em; color:#666;">📍 ${l.addr}, ${ville}</p>
-<a href="${url}" target="_blank" class="map-link">➡️ Voir sur Google Maps</a>
+<h3>${l.name}</h3>
+<p>📍 ${l.addr}, ${ville}</p>
+<a href="${url}" target="_blank" class="map-link">🗺️ Google Maps</a>
 </div>`;
 
             });
@@ -190,9 +173,9 @@
 
             const adr = document.getElementById('addAddr').value;
 
-            if(!nom || !adr) return alert("Nom et adresse obligatoires !");
+            if(!nom || !adr) return alert("Remplissez le nom et l'adresse !");
 
-            lieux.push({
+            database.push({
 
                 id: Date.now(),
 
@@ -210,7 +193,7 @@
 
             });
 
-            sauvegarder();
+            sauver();
 
             document.getElementById('addName').value = "";
 
@@ -220,29 +203,27 @@
 
         function supprimer(id) {
 
-            if(confirm("Supprimer cette adresse ?")) {
+            if(confirm("Supprimer ?")) {
 
-                lieux = lieux.filter(l => l.id !== id);
+                database = database.filter(l => l.id !== id);
 
-                sauvegarder();
+                sauver();
 
             }
 
         }
 
-        function sauvegarder() {
+        function sauver() {
 
-            localStorage.setItem('monCarnetV4', JSON.stringify(lieux));
+            localStorage.setItem('monCarnetV5', JSON.stringify(database));
 
-            afficherLieux();
+            rechercher();
 
         }
 
-        // PARTAGE
-
         function exporterDonnees() {
 
-            const blob = new Blob([JSON.stringify(lieux)], {type: "application/json"});
+            const blob = new Blob([JSON.stringify(database)], {type: "application/json"});
 
             const url = URL.createObjectURL(blob);
 
@@ -250,7 +231,7 @@
 
             a.href = url;
 
-            a.download = "mes_adresses_favoris.json";
+            a.download = "adresses.json";
 
             a.click();
 
@@ -262,15 +243,11 @@
 
             reader.onload = function(e) {
 
-                const importés = JSON.parse(e.target.result);
+                const importes = JSON.parse(e.target.result);
 
-                if(confirm("Importer " + importés.length + " nouveaux lieux ?")) {
+                database = database.concat(importes);
 
-                    lieux = lieux.concat(importés);
-
-                    sauvegarder();
-
-                }
+                sauver();
 
             };
 
@@ -280,5 +257,4 @@
 </script>
 </body>
 </html>
- 
  
