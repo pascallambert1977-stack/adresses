@@ -17,21 +17,13 @@
 
         .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-size: 16px; border-radius: 10px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
 
-        .btn:hover { filter: brightness(1.2); }
-
-        .btn-alt { background: #4a4a4a; font-size: 0.8em; margin-top: 5px; }
-
         .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-        .badge { background: #f3e5f5; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
 
         label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.85em; color: #666; }
 
         select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
 
         .delete-btn { color: #ff4d4d; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.75em; float: right; }
-
-        .map-link { color: var(--primary); font-weight: bold; text-decoration: none; display: inline-block; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -39,8 +31,8 @@
 <div class="card" style="background: #fdf5ff;">
 <h2>📤 Échange de données</h2>
 <div style="display: flex; gap: 10px;">
-<button class="btn btn-alt" onclick="exporterDonnees()">💾 Sauvegarder (JSON)</button>
-<button class="btn btn-alt" onclick="document.getElementById('fileIn').click()">📂 Charger un fichier</button>
+<button class="btn" style="background:#4a4a4a; font-size:0.8em;" onclick="exporterDonnees()">💾 Sauvegarder (JSON)</button>
+<button class="btn" style="background:#4a4a4a; font-size:0.8em;" onclick="document.getElementById('fileIn').click()">📂 Charger un fichier</button>
 </div>
 <input type="file" id="fileIn" style="display:none" onchange="importerDonnees(event)">
 </div>
@@ -54,19 +46,25 @@
 <option value="bx">Bruxelles</option>
 <option value="hors">Hors Bruxelles</option>
 </select>
+<div id="searchCommuneBox" style="display:none;">
+<label>Choisir la commune :</label>
+<select id="searchCommune" onchange="rechercher()">
+<option value="toutes">Toutes les communes</option>
+</select>
+</div>
 <div id="searchCityBox" style="display:none;">
 <label>Ville précise :</label>
-<input type="text" id="searchCity" placeholder="Ex: Namur, Liège..." onkeyup="rechercher()">
+<input type="text" id="searchCity" placeholder="Ex: Namur..." onkeyup="rechercher()">
 </div>
 </div>
 <div id="displayArea"></div>
 <div class="card" style="border-top: 6px solid #FFD700;">
 <h2>➕ Ajouter une adresse</h2>
 <label>Nom :</label><input type="text" id="addName">
-<label>C'est à Bruxelles ?</label>
+<label>Zone :</label>
 <select id="addIsBx" onchange="toggleFormAdd()">
-<option value="oui">Oui</option>
-<option value="non">Non (Ailleurs)</option>
+<option value="oui">Bruxelles</option>
+<option value="non">Hors Bruxelles</option>
 </select>
 <div id="addBoxBx"><label>Commune :</label><select id="addCommune"></select></div>
 <div id="addBoxHors" style="display:none"><label>Ville :</label><input type="text" id="addCity"></div>
@@ -81,9 +79,17 @@
 
         window.onload = function() {
 
-            const sel = document.getElementById('addCommune');
+            const addSel = document.getElementById('addCommune');
 
-            communes.sort().forEach(c => sel.add(new Option(c, c)));
+            const searchSel = document.getElementById('searchCommune');
+
+            communes.sort().forEach(c => {
+
+                addSel.add(new Option(c, c));
+
+                searchSel.add(new Option(c, c));
+
+            });
 
             rechercher();
 
@@ -103,11 +109,17 @@
 
             const zone = document.getElementById('searchZone').value;
 
-            const cityFilter = document.getElementById('searchCity').value.toLowerCase();
-
             const nameFilter = document.getElementById('searchName').value.toLowerCase();
 
+            const cityFilter = document.getElementById('searchCity').value.toLowerCase();
+
+            const communeFilter = document.getElementById('searchCommune').value;
+
             const container = document.getElementById('displayArea');
+
+            // Gérer l'affichage des barres de filtres
+
+            document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
 
             document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
 
@@ -115,13 +127,17 @@
 
             database.filter(l => {
 
-                const matchZone = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
-
-                const matchCity = (zone !== 'hors') || (l.city && l.city.toLowerCase().includes(cityFilter));
-
                 const matchName = l.name.toLowerCase().includes(nameFilter);
 
-                return matchZone && matchCity && matchName;
+                const matchZone = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
+
+                let matchDetail = true;
+
+                if(zone === 'bx' && communeFilter !== 'toutes') matchDetail = (l.commune === communeFilter);
+
+                if(zone === 'hors') matchDetail = l.city.toLowerCase().includes(cityFilter);
+
+                return matchName && matchZone && matchDetail;
 
             }).forEach(l => {
 
@@ -141,9 +157,27 @@
 
             if(!nom || !adr) return alert("Remplissez tout !");
 
-            database.push({ id: Date.now(), name: nom, isBx: document.getElementById('addIsBx').value === 'oui', commune: document.getElementById('addCommune').value, city: document.getElementById('addCity').value, addr: adr, type: "📍" });
+            database.push({
+
+                id: Date.now(),
+
+                name: nom,
+
+                isBx: document.getElementById('addIsBx').value === 'oui',
+
+                commune: document.getElementById('addCommune').value,
+
+                city: document.getElementById('addCity').value,
+
+                addr: adr
+
+            });
 
             sauver();
+
+            document.getElementById('addName').value = "";
+
+            document.getElementById('addAddr').value = "";
 
         }
 
