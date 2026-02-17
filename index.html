@@ -27,49 +27,66 @@
 
         .card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #eee; backdrop-filter: blur(5px); }
 
-        h1 { color: var(--primary); text-align: center; font-variant: small-caps; }
+        h1 { color: var(--primary); text-align: center; font-variant: small-caps; text-shadow: 1px 1px 2px white; }
 
-        .settings-panel { display: none; background: #eee; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed var(--primary); }
+        .settings-panel { display: none; background: #fff; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-size: 16px; border-radius: 10px; font-weight: bold; margin-top: 10px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-size: 16px; border-radius: 10px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
 
-        .btn-settings { background: none; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 5px 15px; font-size: 0.8em; float: right; }
+        .btn:hover { filter: brightness(1.2); }
 
-        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); animation: fadeIn 0.3s; }
+        .btn-alt { background: #4a4a4a; font-size: 0.85em; margin-top: 5px; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-settings { background: white; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 8px 15px; font-size: 0.8em; float: right; border-radius: 8px; cursor: pointer; }
 
-        label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; }
+        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); position: relative; animation: fadeIn 0.3s; }
+
+        .delete-btn { color: #ff4d4d; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.75em; position: absolute; top: 15px; right: 15px; }
+
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.85em; color: #555; }
 
         select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
-<button class="btn btn-settings" onclick="toggleSettings()">⚙️ Réglages Look</button>
+<button class="btn-settings" onclick="toggleSettings()">⚙️ Réglages & Données</button>
 <h1>🔮 Lieu de contact</h1>
 <div id="settings" class="settings-panel">
-<h3>🎨 Personnalisation</h3>
-<label>Accent :</label><input type="color" id="themeColor" onchange="updateStyle('primary', this.value)">
-<label>Fond :</label><input type="color" id="bgColor" onchange="updateStyle('bg-color', this.value)">
-<label>Lien Image :</label><input type="text" id="bgImgUrl" onchange="updateStyle('bg-image', this.value)">
-<button class="btn" style="background:#555" onclick="toggleSettings()">Fermer</button>
+<h2 style="margin-top:0; color:var(--primary);">Configuration</h2>
+<label>🖼️ Fond d'écran (Image de votre appareil) :</label>
+<input type="file" accept="image/*" onchange="uploadFond(event)">
+<label>🎨 Couleur des boutons :</label>
+<input type="color" id="themeColor" onchange="updateStyle('primary', this.value)">
+<hr>
+<h3 style="margin-bottom:5px;">📥 Échange de listes</h3>
+<p style="font-size: 0.8em; color: #666; margin-bottom: 10px;">Utilisez ces boutons pour sauvegarder vos adresses ou charger le fichier d'un ami.</p>
+<div style="display: flex; gap: 10px;">
+<button class="btn btn-alt" onclick="exporterDonnees()">💾 Exporter JSON</button>
+<button class="btn btn-alt" onclick="document.getElementById('fileIn').click()">📂 Importer JSON</button>
+</div>
+<input type="file" id="fileIn" style="display:none" onchange="importerDonnees(event)">
+<button class="btn" style="background:#000; margin-top:30px;" onclick="toggleSettings()">Fermer les réglages</button>
 </div>
 <div class="card">
 <h2>🔍 Rechercher</h2>
-<input type="text" id="searchName" placeholder="Tapez le nom d'un lieu pour le voir..." onkeyup="rechercher()">
+<input type="text" id="searchName" placeholder="Taper un nom pour voir les résultats..." onkeyup="rechercher()">
 <select id="searchZone" onchange="rechercher()" style="margin-top:10px;">
 <option value="rien">-- Choisir une zone --</option>
-<option value="tous">🌍 Toutes mes adresses</option>
+<option value="tous">🌍 Toutes les adresses</option>
 <option value="bx">🇧🇪 Bruxelles</option>
 <option value="hors">🚗 Hors Bruxelles</option>
 </select>
 <div id="searchCommuneBox" style="display:none;"><select id="searchCommune" onchange="rechercher()"></select></div>
-<div id="searchCityBox" style="display:none;"><input type="text" id="searchCity" placeholder="Quelle ville ?" onkeyup="rechercher()"></div>
+<div id="searchCityBox" style="display:none;"><input type="text" id="searchCity" placeholder="Ville ?" onkeyup="rechercher()"></div>
 </div>
 <div id="displayArea"></div>
 <div class="card" style="border-top: 6px solid #FFD700;">
-<h2>➕ Ajouter</h2>
-<input type="text" id="addName" placeholder="Nom">
+<h2>➕ Ajouter une adresse</h2>
+<input type="text" id="addName" placeholder="Nom du lieu">
 <select id="addIsBx" onchange="toggleFormAdd()">
 <option value="oui">Bruxelles</option>
 <option value="non">Hors Bruxelles</option>
@@ -83,9 +100,9 @@
 
         const communes = ["Anderlecht", "Auderghem", "Berchem-Sainte-Agathe", "Bruxelles-Ville", "Etterbeek", "Evere", "Forest", "Ganshoren", "Ixelles", "Jette", "Koekelberg", "Molenbeek-Saint-Jean", "Saint-Gilles", "Saint-Josse-ten-Noode", "Schaerbeek", "Uccle", "Watermael-Boitsfort", "Woluwe-Saint-Lambert", "Woluwe-Saint-Pierre"];
 
-        let database = JSON.parse(localStorage.getItem('monCarnetV6')) || [];
+        let database = JSON.parse(localStorage.getItem('monCarnetV8')) || [];
 
-        let styles = JSON.parse(localStorage.getItem('monStyleV6')) || { primary: '#800080', bgColor: '#fdfafc', bgImg: '' };
+        let styles = JSON.parse(localStorage.getItem('monStyleV8')) || { primary: '#800080', bgImg: '' };
 
         window.onload = function() {
 
@@ -105,9 +122,51 @@
 
             });
 
-            // On ne lance pas "rechercher()" au démarrage pour laisser l'écran vide
-
         };
+
+        function uploadFond(event) {
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+
+                const base64Image = e.target.result;
+
+                document.documentElement.style.setProperty('--bg-image', `url('${base64Image}')`);
+
+                styles.bgImg = base64Image;
+
+                localStorage.setItem('monStyleV8', JSON.stringify(styles));
+
+            };
+
+            reader.readAsDataURL(event.target.files[0]);
+
+        }
+
+        function updateStyle(type, value) {
+
+            if (type === 'primary') {
+
+                document.documentElement.style.setProperty('--primary', value);
+
+                styles.primary = value;
+
+            }
+
+            localStorage.setItem('monStyleV8', JSON.stringify(styles));
+
+        }
+
+        function applySavedStyles() {
+
+            document.documentElement.style.setProperty('--primary', styles.primary);
+
+            if(styles.bgImg) document.documentElement.style.setProperty('--bg-image', `url('${styles.bgImg}')`);
+
+            document.getElementById('themeColor').value = styles.primary;
+
+        }
 
         function rechercher() {
 
@@ -121,25 +180,15 @@
 
             const area = document.getElementById('displayArea');
 
-            // Masquer les barres si rien n'est sélectionné
-
             document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
 
             document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
 
-            // CONDITION CRUCIALE : Si tout est vide, on n'affiche rien du tout
-
-            if (zone === "rien" && nameF === "") {
-
-                area.innerHTML = "";
-
-                return;
-
-            }
+            if (zone === "rien" && nameF === "") { area.innerHTML = ""; return; }
 
             area.innerHTML = "";
 
-            const filtered = database.filter(l => {
+            database.filter(l => {
 
                 const mN = nameF === "" || l.name.toLowerCase().includes(nameF);
 
@@ -153,51 +202,47 @@
 
                 return mN && mZ && mD;
 
+            }).forEach(l => {
+
+                const v = l.isBx ? l.commune : l.city;
+
+                area.innerHTML += `<div class="result-item"><button class="delete-btn" onclick="supprimer(${l.id})">Supprimer</button><h3>${l.name}</h3><p>📍 ${l.addr}, ${v}</p></div>`;
+
             });
 
-            if (filtered.length > 0) {
+        }
 
-                filtered.forEach(l => {
+        function ajouterLieu() {
 
-                    const v = l.isBx ? l.commune : l.city;
+            const n = document.getElementById('addName').value; const a = document.getElementById('addAddr').value;
 
-                    area.innerHTML += `<div class="result-item"><h3>${l.name}</h3><p>📍 ${l.addr}, ${v}</p></div>`;
+            if(!n || !a) return alert("Remplissez les champs !");
 
-                });
+            database.push({ id: Date.now(), name: n, isBx: document.getElementById('addIsBx').value==='oui', commune: document.getElementById('addCommune').value, city: document.getElementById('addCity').value, addr: a });
 
-            } else if (nameF !== "") {
+            localStorage.setItem('monCarnetV8', JSON.stringify(database));
 
-                area.innerHTML = "<p style='text-align:center; color:white;'>Aucun résultat trouvé.</p>";
+            document.getElementById('addName').value = ""; document.getElementById('addAddr').value = "";
 
-            }
+            alert("Lieu enregistré !"); rechercher();
 
         }
 
-        // --- Fonctions de base identiques ---
+        function supprimer(id) { if(confirm("Supprimer ?")) { database = database.filter(l => l.id !== id); localStorage.setItem('monCarnetV8', JSON.stringify(database)); rechercher(); } }
+
+        function exporterDonnees() { const blob = new Blob([JSON.stringify(database)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "mes_adresses.json"; a.click(); }
+
+        function importerDonnees(event) {
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) { database = database.concat(JSON.parse(e.target.result)); localStorage.setItem('monCarnetV8', JSON.stringify(database)); alert("Importé !"); rechercher(); };
+
+            reader.readAsText(event.target.files[0]);
+
+        }
 
         function toggleSettings() { const s = document.getElementById('settings'); s.style.display = (s.style.display === 'block') ? 'none' : 'block'; }
-
-        function updateStyle(type, value) {
-
-            if (type === 'primary') { document.documentElement.style.setProperty('--primary', value); styles.primary = value; }
-
-            else if (type === 'bg-color') { document.documentElement.style.setProperty('--bg-color', value); styles.bgColor = value; }
-
-            else if (type === 'bg-image') { const url = value ? `url('${value}')` : 'none'; document.documentElement.style.setProperty('--bg-image', url); styles.bgImg = value; }
-
-            localStorage.setItem('monStyleV6', JSON.stringify(styles));
-
-        }
-
-        function applySavedStyles() {
-
-            document.documentElement.style.setProperty('--primary', styles.primary);
-
-            document.documentElement.style.setProperty('--bg-color', styles.bgColor);
-
-            if(styles.bgImg) document.documentElement.style.setProperty('--bg-image', `url('${styles.bgImg}')`);
-
-        }
 
         function toggleFormAdd() {
 
@@ -206,24 +251,6 @@
             document.getElementById('addBoxBx').style.display = isBx ? 'block' : 'none';
 
             document.getElementById('addBoxHors').style.display = isBx ? 'none' : 'block';
-
-        }
-
-        function ajouterLieu() {
-
-            const n = document.getElementById('addName').value; const a = document.getElementById('addAddr').value;
-
-            if(!n || !a) return alert("Nom et adresse requis");
-
-            database.push({ id: Date.now(), name: n, isBx: document.getElementById('addIsBx').value==='oui', commune: document.getElementById('addCommune').value, city: document.getElementById('addCity').value, addr: a });
-
-            localStorage.setItem('monCarnetV6', JSON.stringify(database));
-
-            document.getElementById('addName').value = ""; document.getElementById('addAddr').value = "";
-
-            alert("Enregistré ! Tapez son nom pour le retrouver.");
-
-            rechercher();
 
         }
 </script>
