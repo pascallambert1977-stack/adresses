@@ -2,18 +2,10 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Mon Carnet Custom</title>
+<title>Mon Carnet Privé</title>
 <style>
 
-        :root { 
-
-            --primary: #800080; 
-
-            --bg-color: #fdfafc;
-
-            --bg-image: none;
-
-        }
+        :root { --primary: #800080; --bg-color: #fdfafc; --bg-image: none; }
 
         body { 
 
@@ -29,21 +21,13 @@
 
             background-position: center;
 
-            max-width: 800px; 
-
-            margin: 0 auto; 
-
-            padding: 20px; 
-
-            color: #333; 
-
-            transition: 0.3s;
+            max-width: 800px; margin: 0 auto; padding: 20px; color: #333; transition: 0.3s;
 
         }
 
         .card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #eee; backdrop-filter: blur(5px); }
 
-        h1 { color: var(--primary); text-align: center; font-variant: small-caps; text-shadow: 1px 1px 2px white; }
+        h1 { color: var(--primary); text-align: center; font-variant: small-caps; }
 
         .settings-panel { display: none; background: #eee; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed var(--primary); }
 
@@ -51,7 +35,9 @@
 
         .btn-settings { background: none; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 5px 15px; font-size: 0.8em; float: right; }
 
-        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); }
+        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); animation: fadeIn 0.3s; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; }
 
@@ -60,32 +46,29 @@
 </head>
 <body>
 <button class="btn btn-settings" onclick="toggleSettings()">⚙️ Réglages Look</button>
-<h1>🔮 Mon Carnet Privé</h1>
+<h1>🔮 Lieu de contact</h1>
 <div id="settings" class="settings-panel">
-<h3>🎨 Personnaliser l'apparence</h3>
-<label>Couleur de l'accent (Boutons/Titres) :</label>
-<input type="color" id="themeColor" value="#800080" onchange="updateStyle('primary', this.value)">
-<label>Couleur du fond :</label>
-<input type="color" id="bgColor" value="#fdfafc" onchange="updateStyle('bg-color', this.value)">
-<label>Image de fond (Lien URL) :</label>
-<input type="text" id="bgImgUrl" placeholder="Collez le lien d'une image .jpg ou .png" onchange="updateStyle('bg-image', this.value)">
-<p style="font-size: 0.7em; color: #666;">Exemple : https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a</p>
-<button class="btn" style="background:#555" onclick="toggleSettings()">Fermer les réglages</button>
+<h3>🎨 Personnalisation</h3>
+<label>Accent :</label><input type="color" id="themeColor" onchange="updateStyle('primary', this.value)">
+<label>Fond :</label><input type="color" id="bgColor" onchange="updateStyle('bg-color', this.value)">
+<label>Lien Image :</label><input type="text" id="bgImgUrl" onchange="updateStyle('bg-image', this.value)">
+<button class="btn" style="background:#555" onclick="toggleSettings()">Fermer</button>
 </div>
 <div class="card">
-<h2>🔍 Trouver un lieu</h2>
-<input type="text" id="searchName" placeholder="Rechercher par nom..." onkeyup="rechercher()">
+<h2>🔍 Rechercher</h2>
+<input type="text" id="searchName" placeholder="Tapez le nom d'un lieu pour le voir..." onkeyup="rechercher()">
 <select id="searchZone" onchange="rechercher()" style="margin-top:10px;">
-<option value="tous">Toutes les zones</option>
-<option value="bx">Bruxelles</option>
-<option value="hors">Hors Bruxelles</option>
+<option value="rien">-- Choisir une zone --</option>
+<option value="tous">🌍 Toutes mes adresses</option>
+<option value="bx">🇧🇪 Bruxelles</option>
+<option value="hors">🚗 Hors Bruxelles</option>
 </select>
 <div id="searchCommuneBox" style="display:none;"><select id="searchCommune" onchange="rechercher()"></select></div>
-<div id="searchCityBox" style="display:none;"><input type="text" id="searchCity" placeholder="Ville..." onkeyup="rechercher()"></div>
+<div id="searchCityBox" style="display:none;"><input type="text" id="searchCity" placeholder="Quelle ville ?" onkeyup="rechercher()"></div>
 </div>
 <div id="displayArea"></div>
 <div class="card" style="border-top: 6px solid #FFD700;">
-<h2>➕ Nouveau lieu</h2>
+<h2>➕ Ajouter</h2>
 <input type="text" id="addName" placeholder="Nom">
 <select id="addIsBx" onchange="toggleFormAdd()">
 <option value="oui">Bruxelles</option>
@@ -122,41 +105,85 @@
 
             });
 
-            rechercher();
+            // On ne lance pas "rechercher()" au démarrage pour laisser l'écran vide
 
         };
 
-        function toggleSettings() {
+        function rechercher() {
 
-            const s = document.getElementById('settings');
+            const zone = document.getElementById('searchZone').value;
 
-            s.style.display = (s.style.display === 'block') ? 'none' : 'block';
+            const nameF = document.getElementById('searchName').value.trim().toLowerCase();
+
+            const cityF = document.getElementById('searchCity').value.toLowerCase();
+
+            const commF = document.getElementById('searchCommune').value;
+
+            const area = document.getElementById('displayArea');
+
+            // Masquer les barres si rien n'est sélectionné
+
+            document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
+
+            document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
+
+            // CONDITION CRUCIALE : Si tout est vide, on n'affiche rien du tout
+
+            if (zone === "rien" && nameF === "") {
+
+                area.innerHTML = "";
+
+                return;
+
+            }
+
+            area.innerHTML = "";
+
+            const filtered = database.filter(l => {
+
+                const mN = nameF === "" || l.name.toLowerCase().includes(nameF);
+
+                const mZ = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
+
+                let mD = true;
+
+                if(zone === 'bx' && commF !== 'toutes') mD = (l.commune === commF);
+
+                if(zone === 'hors') mD = l.city.toLowerCase().includes(cityF);
+
+                return mN && mZ && mD;
+
+            });
+
+            if (filtered.length > 0) {
+
+                filtered.forEach(l => {
+
+                    const v = l.isBx ? l.commune : l.city;
+
+                    area.innerHTML += `<div class="result-item"><h3>${l.name}</h3><p>📍 ${l.addr}, ${v}</p></div>`;
+
+                });
+
+            } else if (nameF !== "") {
+
+                area.innerHTML = "<p style='text-align:center; color:white;'>Aucun résultat trouvé.</p>";
+
+            }
 
         }
 
+        // --- Fonctions de base identiques ---
+
+        function toggleSettings() { const s = document.getElementById('settings'); s.style.display = (s.style.display === 'block') ? 'none' : 'block'; }
+
         function updateStyle(type, value) {
 
-            if (type === 'primary') {
+            if (type === 'primary') { document.documentElement.style.setProperty('--primary', value); styles.primary = value; }
 
-                document.documentElement.style.setProperty('--primary', value);
+            else if (type === 'bg-color') { document.documentElement.style.setProperty('--bg-color', value); styles.bgColor = value; }
 
-                styles.primary = value;
-
-            } else if (type === 'bg-color') {
-
-                document.documentElement.style.setProperty('--bg-color', value);
-
-                styles.bgColor = value;
-
-            } else if (type === 'bg-image') {
-
-                const url = value ? `url('${value}')` : 'none';
-
-                document.documentElement.style.setProperty('--bg-image', url);
-
-                styles.bgImg = value;
-
-            }
+            else if (type === 'bg-image') { const url = value ? `url('${value}')` : 'none'; document.documentElement.style.setProperty('--bg-image', url); styles.bgImg = value; }
 
             localStorage.setItem('monStyleV6', JSON.stringify(styles));
 
@@ -170,12 +197,6 @@
 
             if(styles.bgImg) document.documentElement.style.setProperty('--bg-image', `url('${styles.bgImg}')`);
 
-            document.getElementById('themeColor').value = styles.primary;
-
-            document.getElementById('bgColor').value = styles.bgColor;
-
-            document.getElementById('bgImgUrl').value = styles.bgImg;
-
         }
 
         function toggleFormAdd() {
@@ -188,53 +209,9 @@
 
         }
 
-        function rechercher() {
-
-            const zone = document.getElementById('searchZone').value;
-
-            const nameF = document.getElementById('searchName').value.toLowerCase();
-
-            const cityF = document.getElementById('searchCity').value.toLowerCase();
-
-            const commF = document.getElementById('searchCommune').value;
-
-            document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
-
-            document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
-
-            const area = document.getElementById('displayArea');
-
-            area.innerHTML = "";
-
-            database.filter(l => {
-
-                const mN = l.name.toLowerCase().includes(nameF);
-
-                const mZ = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
-
-                let mD = true;
-
-                if(zone === 'bx' && commF !== 'toutes') mD = (l.commune === commF);
-
-                if(zone === 'hors') mD = l.city.toLowerCase().includes(cityF);
-
-                return mN && mZ && mD;
-
-            }).forEach(l => {
-
-                const v = l.isBx ? l.commune : l.city;
-
-                area.innerHTML += `<div class="result-item"><h3>${l.name}</h3><p>📍 ${l.addr}, ${v}</p></div>`;
-
-            });
-
-        }
-
         function ajouterLieu() {
 
-            const n = document.getElementById('addName').value;
-
-            const a = document.getElementById('addAddr').value;
+            const n = document.getElementById('addName').value; const a = document.getElementById('addAddr').value;
 
             if(!n || !a) return alert("Nom et adresse requis");
 
@@ -243,6 +220,8 @@
             localStorage.setItem('monCarnetV6', JSON.stringify(database));
 
             document.getElementById('addName').value = ""; document.getElementById('addAddr').value = "";
+
+            alert("Enregistré ! Tapez son nom pour le retrouver.");
 
             rechercher();
 
