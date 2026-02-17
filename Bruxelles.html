@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mon Carnet d'Adresses Personnalisable</title>
+<style>
+
+        /* Variables de couleurs qui changeront dynamiquement */
+
+        :root {
+
+            --primary: #4169E1;
+
+            --bg: #f8f9fa;
+
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); max-width: 800px; margin: 0 auto; padding: 20px; color: #333; transition: 0.3s; }
+
+        .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #eee; }
+
+        h1 { color: var(--primary); text-align: center; margin-bottom: 30px; }
+
+        h2 { font-size: 1.1em; color: #444; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+
+        /* Style des contrôles */
+
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.85em; color: #666; }
+
+        select, input { width: 100%; padding: 12px; margin-top: 5px; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1em; outline: none; transition: 0.2s; }
+
+        select:focus, input:focus { border-color: var(--primary); }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; cursor: pointer; font-size: 16px; border-radius: 10px; margin-top: 10px; font-weight: bold; transition: transform 0.1s, opacity 0.2s; }
+
+        .btn:active { transform: scale(0.98); }
+
+        /* Boutons de partage */
+
+        .share-group { display: flex; gap: 10px; margin-top: 10px; }
+
+        .btn-alt { background: #6c757d; font-size: 0.8em; }
+
+        /* Résultats */
+
+        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+
+        .badge { background: #f0f2ff; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; }
+
+        .map-link { display: inline-block; margin-top: 10px; color: var(--primary); text-decoration: none; font-weight: bold; }
+
+        .delete-btn { color: #ff4d4d; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.7em; float: right; }
+</style>
+</head>
+<body>
+<div style="text-align: right; margin-bottom: 10px;">
+<label style="display:inline; margin-right:10px;">Couleur du thème :</label>
+<input type="color" id="themeColor" value="#4169E1" onchange="changerCouleur(this.value)" style="width: 50px; height: 30px; padding: 2px; vertical-align: middle; cursor: pointer;">
+</div>
+<h1>📍 Mes Bonnes Adresses</h1>
+<div class="card" style="background: #fffdf5; border-color: #ffeeb8;">
+<h2>📤 Partager la liste</h2>
+<div class="share-group">
+<button class="btn btn-alt" onclick="exporterDonnees()">💾 Créer un fichier de sauvegarde</button>
+<button class="btn btn-alt" onclick="document.getElementById('fileIn').click()">📂 Charger un fichier reçu</button>
+</div>
+<input type="file" id="fileIn" style="display:none" onchange="importerDonnees(event)">
+</div>
+<div class="card">
+<h2>🔍 Filtrer par zone</h2>
+<select id="filterZone" onchange="afficherLieux()">
+<option value="tous">🌍 Toutes les adresses</option>
+<option value="bx">🇧🇪 Bruxelles uniquement</option>
+<option value="hors">🚗 Hors Bruxelles</option>
+</select>
+</div>
+<div id="displayArea"></div>
+<div class="card" style="border-top: 6px solid #FFD700;">
+<h2>➕ Ajouter une adresse</h2>
+<label>Nom :</label>
+<input type="text" id="addName" placeholder="Ex: Belga Queen">
+<label>Type de lieu :</label>
+<select id="addType">
+<option value="☕ Café">☕ Café</option>
+<option value="🍴 Restaurant">🍴 Restaurant</option>
+<option value="🏨 Hôtel">🏨 Hôtel</option>
+<option value="🎭 Culture">🎭 Culture / Autre</option>
+</select>
+<label>Localisation :</label>
+<select id="addIsBx" onchange="toggleAddZone()">
+<option value="oui">Bruxelles</option>
+<option value="non">Hors Bruxelles</option>
+</select>
+<div id="addBxZone">
+<label>Commune bruxelloise :</label>
+<select id="addCommune"></select>
+</div>
+<div id="addHorsZone" style="display:none">
+<label>Ville :</label>
+<input type="text" id="addCity" placeholder="Ex: Namur">
+</div>
+<label>Adresse :</label>
+<input type="text" id="addAddr" placeholder="Rue et numéro">
+<button class="btn" onclick="ajouterLieu()">Enregistrer l'adresse</button>
+</div>
+<script>
+
+        const communes = ["Anderlecht", "Auderghem", "Berchem-Sainte-Agathe", "Bruxelles-Ville", "Etterbeek", "Evere", "Forest", "Ganshoren", "Ixelles", "Jette", "Koekelberg", "Molenbeek-Saint-Jean", "Saint-Gilles", "Saint-Josse-ten-Noode", "Schaerbeek", "Uccle", "Watermael-Boitsfort", "Woluwe-Saint-Lambert", "Woluwe-Saint-Pierre"];
+
+        let lieux = JSON.parse(localStorage.getItem('monCarnetV4')) || [];
+
+        let maCouleur = localStorage.getItem('monThemeV4') || '#4169E1';
+
+        window.onload = function() {
+
+            // Initialiser couleur
+
+            changerCouleur(maCouleur);
+
+            document.getElementById('themeColor').value = maCouleur;
+
+            // Remplir les communes
+
+            const sel = document.getElementById('addCommune');
+
+            communes.sort().forEach(c => sel.add(new Option(c, c)));
+
+            afficherLieux();
+
+        };
+
+        function changerCouleur(val) {
+
+            document.documentElement.style.setProperty('--primary', val);
+
+            localStorage.setItem('monThemeV4', val);
+
+        }
+
+        function toggleAddZone() {
+
+            const isBx = document.getElementById('addIsBx').value === 'oui';
+
+            document.getElementById('addBxZone').style.display = isBx ? 'block' : 'none';
+
+            document.getElementById('addHorsZone').style.display = isBx ? 'none' : 'block';
+
+        }
+
+        function afficherLieux() {
+
+            const filtre = document.getElementById('filterZone').value;
+
+            const container = document.getElementById('displayArea');
+
+            container.innerHTML = "";
+
+            const listeFiltrée = lieux.filter(l => {
+
+                if(filtre === 'bx') return l.isBx;
+
+                if(filtre === 'hors') return !l.isBx;
+
+                return true;
+
+            });
+
+            listeFiltrée.forEach(l => {
+
+                const ville = l.isBx ? l.commune : l.city;
+
+                const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.name + ' ' + l.addr + ' ' + ville)}`;
+
+                container.innerHTML += `
+<div class="result-item">
+<button class="delete-btn" onclick="supprimer(${l.id})">Supprimer</button>
+<span class="badge">${l.type}</span>
+<h3 style="margin: 10px 0 5px 0;">${l.name}</h3>
+<p style="margin:0; font-size:0.9em; color:#666;">📍 ${l.addr}, ${ville}</p>
+<a href="${url}" target="_blank" class="map-link">➡️ Voir sur Google Maps</a>
+</div>`;
+
+            });
+
+        }
+
+        function ajouterLieu() {
+
+            const nom = document.getElementById('addName').value;
+
+            const adr = document.getElementById('addAddr').value;
+
+            if(!nom || !adr) return alert("Nom et adresse obligatoires !");
+
+            lieux.push({
+
+                id: Date.now(),
+
+                name: nom,
+
+                type: document.getElementById('addType').value,
+
+                isBx: document.getElementById('addIsBx').value === 'oui',
+
+                commune: document.getElementById('addCommune').value,
+
+                city: document.getElementById('addCity').value,
+
+                addr: adr
+
+            });
+
+            sauvegarder();
+
+            document.getElementById('addName').value = "";
+
+            document.getElementById('addAddr').value = "";
+
+        }
+
+        function supprimer(id) {
+
+            if(confirm("Supprimer cette adresse ?")) {
+
+                lieux = lieux.filter(l => l.id !== id);
+
+                sauvegarder();
+
+            }
+
+        }
+
+        function sauvegarder() {
+
+            localStorage.setItem('monCarnetV4', JSON.stringify(lieux));
+
+            afficherLieux();
+
+        }
+
+        // PARTAGE
+
+        function exporterDonnees() {
+
+            const blob = new Blob([JSON.stringify(lieux)], {type: "application/json"});
+
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+
+            a.href = url;
+
+            a.download = "mes_adresses_favoris.json";
+
+            a.click();
+
+        }
+
+        function importerDonnees(event) {
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+
+                const importés = JSON.parse(e.target.result);
+
+                if(confirm("Importer " + importés.length + " nouveaux lieux ?")) {
+
+                    lieux = lieux.concat(importés);
+
+                    sauvegarder();
+
+                }
+
+            };
+
+            reader.readAsText(event.target.files[0]);
+
+        }
+</script>
+</body>
+</html>
+ 
+ 
