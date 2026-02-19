@@ -29,22 +29,26 @@
         label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
         input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+
+        .results-meta { color: #666; font-size: 0.9em; margin: 8px 0 16px; }
+        .empty { color: #777; font-style: italic; padding: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <button class="btn-settings" onclick="switchLang()" id="langBtn">🇳🇱 NL</button>
+    <button class="btn-settings" onclick="switchLang()" id="langBtn" title="Basculer la langue">🇳🇱 NL</button>
     <h1 id="appTitle">🔮 Lieu de contact</h1>
 
     <div class="card">
         <h3 id="searchTitle">🔍 Rechercher</h3>
-        <input type="text" id="searchInput" placeholder="Nom..." onkeyup="refresh()">
-        <select id="searchZone" onchange="refresh()" style="margin-top:10px;">
+        <input type="text" id="searchInput" placeholder="Nom..." onkeyup="onSearchChange()" autocomplete="off" aria-label="Rechercher par nom">
+        <select id="searchZone" onchange="onSearchChange()" style="margin-top:10px;" aria-label="Filtrer par zone">
             <option value="tous" id="optAll">🌍 Toutes les zones</option>
             <option value="bx">🇧🇪 Bruxelles</option>
             <option value="hors">🚗 Hors Bruxelles</option>
         </select>
+        <div class="results-meta" id="resultsMeta"></div>
     </div>
 
     <div id="results"></div>
@@ -53,26 +57,39 @@
         <h2 id="formTitle">➕ Ajouter</h2>
         <input type="hidden" id="editId">
        
-        <label>Nom :</label><input type="text" id="f-name">
-       
-        <label>Zone :</label>
-        <select id="f-isbx" onchange="toggleZone()">
+        <label for="f-name">Nom :</label>
+        <input type="text" id="f-name" required>
+
+        <label for="f-isbx">Zone :</label>
+        <select id="f-isbx" onchange="toggleZone()" aria-label="Sélection de la zone">
             <option value="oui">Bruxelles</option>
             <option value="non">Hors Bruxelles</option>
         </select>
 
-        <div id="box-bx"><label>Commune :</label><select id="f-commune"></select></div>
-        <div id="box-hors" style="display:none"><label>Ville :</label><input type="text" id="f-city"></div>
+        <div id="box-bx">
+            <label for="f-commune">Commune :</label>
+            <select id="f-commune"></select>
+        </div>
+        <div id="box-hors" style="display:none">
+            <label for="f-city">Ville :</label>
+            <input type="text" id="f-city" placeholder="Ville">
+        </div>
 
-        <label>Adresse :</label><input type="text" id="f-addr">
-        <label>Note :</label><textarea id="f-note" rows="2"></textarea>
+        <label for="f-addr">Adresse :</label>
+        <input type="text" id="f-addr" required autocomplete="street-address" placeholder="Rue, numéro...">
+
+        <label for="f-note">Note :</label>
+        <textarea id="f-note" rows="2" placeholder="Infos complémentaires (optionnel)"></textarea>
        
-        <button class="btn-save" id="btnSubmit" onclick="save()">Enregistrer</button>
+        <button class="btn-save" id="btnSubmit" onclick="save()" title="Enregistrer la fiche">Enregistrer</button>
         <button id="btnCancel" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Annuler</button>
     </div>
 </div>
 
 <script>
+    // ----------------------
+    // Données & traductions
+    // ----------------------
     const communes = ["Anderlecht","Auderghem","Berchem-Sainte-Agathe","Bruxelles-Ville","Etterbeek","Evere","Forest","Ganshoren","Ixelles","Jette","Koekelberg","Molenbeek-Saint-Jean","Saint-Gilles","Saint-Josse-ten-Noode","Schaerbeek","Uccle","Watermael-Boitsfort","Woluwe-Saint-Lambert","Woluwe-Saint-Pierre"];
    
     const tr = {
@@ -84,7 +101,8 @@
             edit: "📝 Modifier",
             maps: "🗺️ Ouvrir dans Maps",
             save: "Enregistrer",
-            update: "Mettre à jour"
+            update: "Mettre à jour",
+            results: (n) => n === 0 ? "Aucun résultat" : n === 1 ? "1 résultat" : `${n} résultats`
         },
         nl: {
             app: "🔮 Contactplaats",
@@ -94,46 +112,47 @@
             edit: "📝 Bewerken",
             maps: "🗺️ Openen in Maps",
             save: "Opslaan",
-            update: "Bijwerken"
+            update: "Bijwerken",
+            results: (n) => n === 0 ? "Geen resultaat" : n === 1 ? "1 resultaat" : `${n} resultaten`
         }
     };
 
-    let lang = localStorage.getItem('lang_v18') || 'fr';
-    let database = JSON.parse(localStorage.getItem('data_v18')) || [];
+    // ----------------------
+    // Utils
+    // ----------------------
+    const LS_KEYS = {
+        lang: 'lang_v18',
+        data: 'data_v18',
+        q: 'search_q_v18',
+        zone: 'search_zone_v18'
+    };
 
-    function init() {
-        const sel = document.getElementById('f-commune');
-        communes.forEach(c => sel.add(new Option(c, c)));
-        // Assure l'affichage du bon bloc (bx / hors bx) au chargement
-        toggleZone();
-        applyLang();
-        refresh();
+    function loadStorage(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+        } catch (e) {
+            console.warn('Lecture stockage échouée:', e);
+            return fallback;
+        }
+    }
+    function saveStorage(key, value) {
+        try {
+            const val = typeof value === 'string' ? value : JSON.stringify(value);
+            localStorage.setItem(key, val);
+        } catch (e) {
+            console.warn('Écriture stockage échouée:', e);
+            alert("Le stockage local est plein ou indisponible.");
+        }
+    }
+    function normalizeLower(s) {
+        return (s || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // retire diacritiques
+            .toLowerCase()
+            .trim();
     }
 
-    function switchLang() {
-        lang = lang === 'fr' ? 'nl' : 'fr';
-        localStorage.setItem('lang_v18', lang);
-        applyLang();
-        refresh();
-    }
-
-    function applyLang() {
-        const l = tr[lang];
-        document.getElementById('appTitle').innerText = l.app;
-        document.getElementById('searchTitle').innerText = l.search;
-        document.getElementById('optAll').innerText = l.all;
-        document.getElementById('langBtn').innerText = lang === 'fr' ? '🇳🇱 NL' : '🇫🇷 FR';
-        document.getElementById('btnSubmit').innerText = document.getElementById('editId').value ? l.update : l.save;
-        document.getElementById('formTitle').innerText = document.getElementById('editId').value ? l.edit : l.add;
-    }
-
-    function toggleZone() {
-        const isBx = document.getElementById('f-isbx').value === 'oui';
-        document.getElementById('box-bx').style.display = isBx ? 'block' : 'none';
-        document.getElementById('box-hors').style.display = isBx ? 'none' : 'block';
-    }
-
-    // Construit une URL Google Maps (mode "Recherche") propre et localisée
     function buildMapsUrl(item) {
         const lieu = item.isBx ? item.commune : item.city;
         const country = (lang === 'nl') ? 'België' : 'Belgique';
@@ -147,60 +166,148 @@
         return `https://www.google.com/maps/search/?${params.toString()}`;
     }
 
+    // ----------------------
+    // État
+    // ----------------------
+    let lang = localStorage.getItem(LS_KEYS.lang) || 'fr';
+    let database = loadStorage(LS_KEYS.data, []);
+    let searchQ = localStorage.getItem(LS_KEYS.q) || '';
+    let searchZone = localStorage.getItem(LS_KEYS.zone) || 'tous';
+
+    // ----------------------
+    // Cycle de vie
+    // ----------------------
+    function init() {
+        const sel = document.getElementById('f-commune');
+        communes.forEach(c => sel.add(new Option(c, c)));
+
+        // initialise recherche (persistée)
+        document.getElementById('searchInput').value = searchQ;
+        document.getElementById('searchZone').value = searchZone;
+
+        toggleZone();
+        applyLang();
+        refresh();
+    }
+
+    function switchLang() {
+        lang = lang === 'fr' ? 'nl' : 'fr';
+        localStorage.setItem(LS_KEYS.lang, lang);
+        applyLang();
+        refresh();
+    }
+
+    function applyLang() {
+        const l = tr[lang];
+        document.getElementById('appTitle').innerText = l.app;
+        document.getElementById('searchTitle').innerText = l.search;
+        document.getElementById('optAll').innerText = l.all;
+        document.getElementById('langBtn').innerText = lang === 'fr' ? '🇳🇱 NL' : '🇫🇷 FR';
+        document.getElementById('btnSubmit').innerText = document.getElementById('editId').value ? l.update : l.save;
+        document.getElementById('formTitle').innerText = document.getElementById('editId').value ? l.edit : l.add;
+        updateResultsMeta(); // met à jour le compteur avec la bonne langue
+    }
+
+    function toggleZone() {
+        const isBx = document.getElementById('f-isbx').value === 'oui';
+        document.getElementById('box-bx').style.display = isBx ? 'block' : 'none';
+        document.getElementById('box-hors').style.display = isBx ? 'none' : 'block';
+    }
+
+    function onSearchChange() {
+        searchQ = document.getElementById('searchInput').value;
+        searchZone = document.getElementById('searchZone').value;
+        localStorage.setItem(LS_KEYS.q, searchQ);
+        localStorage.setItem(LS_KEYS.zone, searchZone);
+        refresh();
+    }
+
+    // ----------------------
+    // Rendu
+    // ----------------------
+    function updateResultsMeta(count = 0) {
+        const el = document.getElementById('resultsMeta');
+        el.textContent = tr[lang].results(count);
+    }
+
     function refresh() {
         const list = document.getElementById('results');
-        const sName = document.getElementById('searchInput').value.toLowerCase();
+        const sName = normalizeLower(document.getElementById('searchInput').value);
         const sZone = document.getElementById('searchZone').value;
         list.innerHTML = "";
 
-        database
-            .filter(i => {
-                const mName = i.name.toLowerCase().includes(sName);
-                const mZone = (sZone === 'tous') || (sZone === 'bx' && i.isBx) || (sZone === 'hors' && !i.isBx);
-                return mName && mZone;
-            })
-            .forEach(i => {
-                const lieu = i.isBx ? i.commune : i.city;
-                const mapsUrl = buildMapsUrl(i);
+        const filtered = database.filter(i => {
+            const mName = normalizeLower(i.name).includes(sName);
+            const mZone = (sZone === 'tous') || (sZone === 'bx' && i.isBx) || (sZone === 'hors' && !i.isBx);
+            return mName && mZone;
+        }).sort((a, b) => normalizeLower(a.name).localeCompare(normalizeLower(b.name)));
 
-                list.innerHTML += `
-                    <div class="result-item">
-                        <div class="actions">
-                            <button class="btn-edit" onclick="loadEdit(${i.id})">${tr[lang].edit}</button>
-                            <button class="btn-del" onclick="del(${i.id})">X</button>
-                        </div>
-                        <h3>${i.name}</h3>
-                        <p>📍 ${i.addr}, ${lieu}</p>
-                        ${i.note ? `<p style="font-style:italic; color:gray;">💬 ${i.note}</p>` : ''}
-                        <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-maps">${tr[lang].maps}</a>
-                    </div>`;
-            });
+        updateResultsMeta(filtered.length);
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<div class="empty">${tr[lang].results(0)}</div>`;
+            return;
+        }
+
+        filtered.forEach(i => {
+            const lieu = i.isBx ? i.commune : i.city;
+            const mapsUrl = buildMapsUrl(i);
+            const nameEsc = i.name; // champs insérés dans des nœuds textuels via template (limite XSS si on garde des valeurs propres)
+            const addrEsc = i.addr;
+            const lieuEsc = lieu;
+            const noteEsc = i.note || '';
+
+            list.innerHTML += `
+                <div class="result-item">
+                    <div class="actions">
+                        <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
+                        <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
+                    </div>
+                    <h3>${nameEsc}</h3>
+                    <p>📍 ${addrEsc}, ${lieuEsc}</p>
+                    ${noteEsc ? `<p style="font-style:italic; color:gray;">💬 ${noteEsc}</p>` : ''}
+                    <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-maps">${tr[lang].maps}</a>
+                </div>`;
+        });
     }
 
+    // ----------------------
+    // Données (CRUD)
+    // ----------------------
     function save() {
         const id = document.getElementById('editId').value;
         const name = document.getElementById('f-name').value.trim();
         const addr = document.getElementById('f-addr').value.trim();
-        if(!name || !addr) return alert("Nom et Adresse obligatoires");
+        const isBx = document.getElementById('f-isbx').value === 'oui';
+        const commune = document.getElementById('f-commune').value;
+        const city = document.getElementById('f-city').value.trim();
+        const note = document.getElementById('f-note').value;
+
+        if (!name || !addr) return alert("Nom et Adresse obligatoires");
 
         const obj = {
             id: id ? parseInt(id) : Date.now(),
-            name: name,
-            isBx: document.getElementById('f-isbx').value === 'oui',
-            commune: document.getElementById('f-commune').value,
-            city: document.getElementById('f-city').value,
-            addr: addr,
-            note: document.getElementById('f-note').value
+            name, isBx, commune, city, addr, note
         };
 
-        if(id) {
+        // Anti-doublons: même nom + adresse + lieu
+        const key = `${normalizeLower(name)}|${normalizeLower(addr)}|${normalizeLower(isBx ? commune : city)}`;
+        const existingIdx = database.findIndex(x =>
+            `${normalizeLower(x.name)}|${normalizeLower(x.addr)}|${normalizeLower(x.isBx ? x.commune : x.city)}` === key
+        );
+
+        if (id) {
             const idx = database.findIndex(x => x.id === parseInt(id));
-            database[idx] = obj;
+            if (idx !== -1) database[idx] = obj;
+        } else if (existingIdx !== -1) {
+            // si doublon, on met à jour la fiche existante
+            obj.id = database[existingIdx].id;
+            database[existingIdx] = obj;
         } else {
             database.push(obj);
         }
 
-        localStorage.setItem('data_v18', JSON.stringify(database));
+        saveStorage(LS_KEYS.data, database);
         resetForm();
         refresh();
     }
@@ -227,7 +334,7 @@
         document.getElementById('f-name').value = "";
         document.getElementById('f-addr').value = "";
         document.getElementById('f-note').value = "";
-        // on ne modifie pas la zone sélectionnée par défaut, mais on s'assure du bon affichage
+        // on garde la zone choisie mais on rafraîchit l'affichage
         toggleZone();
         document.getElementById('formTitle').innerText = tr[lang].add;
         document.getElementById('btnCancel').style.display = 'none';
@@ -235,15 +342,17 @@
     }
 
     function del(id) {
-        if(confirm("Supprimer ?")) {
+        if (confirm("Supprimer ?")) {
             database = database.filter(x => x.id !== id);
-            localStorage.setItem('data_v18', JSON.stringify(database));
+            saveStorage(LS_KEYS.data, database);
             refresh();
         }
     }
 
+    // start
     init();
 </script>
 
 </body>
 </html>
+``
