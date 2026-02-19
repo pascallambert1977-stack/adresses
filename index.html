@@ -214,48 +214,53 @@
         }
 
         function rechercher() {
-            const zone = document.getElementById('searchZone').value;
-            const nameF = document.getElementById('searchName').value.trim().toLowerCase();
-            const cityF = document.getElementById('searchCity').value.toLowerCase();
-            const commF = document.getElementById('searchCommune').value;
-            const area = document.getElementById('displayArea');
-            document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
-            document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
-            if (zone === "rien" && nameF === "") { area.innerHTML = ""; return; }
-            area.innerHTML = "";
-            database.filter(l => {
-                const mN = nameF === "" || l.name.toLowerCase().includes(nameF);
-                const mZ = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
-                let mD = true;
-                if(zone === 'bx' && commF !== 'toutes') mD = (l.commune === commF);
-                if(zone === 'hors') mD = (l.city || "").toLowerCase().includes(cityF);
-                return mN && mZ && mD;
-            }).forEach(l => {
-                const v = l.isBx ? (currentLang === 'nl' ? communesNL[l.commune] : l.commune) : l.city;
-                const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C50fbe64a6c5642266d8308de6fc0aa82%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071070432073812%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=IluaTTgL0UsWrqLo%2FcZlYvWAqyUBl4Rsb1Gc6n%2BJ%2B2g%3D&reserved=0{encodeURIComponent(l.name + ' ' + l.addr + ' ' + v)}`;
-               
-                // On s'assure que le badge affiche le texte traduit selon la sélection actuelle
-                let badgeText = l.type;
-                if(l.type.includes("Hôtel") || l.type.includes("Hotel")) badgeText = dict[currentLang].optHotel;
-                else if(l.type.includes("Restaurant")) badgeText = dict[currentLang].optResto;
-                else if(l.type.includes("Café")) badgeText = dict[currentLang].optCafe;
-                else if(l.type.includes("Culture")) badgeText = dict[currentLang].optCult;
-                else if(l.type.includes("Autre") || l.type.includes("Andere")) badgeText = dict[currentLang].optOther;
+    const zone = document.getElementById('searchZone').value;
+    const nameF = document.getElementById('searchName').value.trim().toLowerCase();
+    const cityF = document.getElementById('searchCity').value.toLowerCase();
+    const commF = document.getElementById('searchCommune').value;
+    const area = document.getElementById('displayArea');
+   
+    document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
+    document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
+   
+    if (zone === "rien" && nameF === "") { area.innerHTML = ""; return; }
+   
+    area.innerHTML = "";
+    database.filter(l => {
+        const mN = nameF === "" || l.name.toLowerCase().includes(nameF);
+        const mZ = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
+        let mD = true;
+        if(zone === 'bx' && commF !== 'toutes') mD = (l.commune === commF);
+        if(zone === 'hors') mD = (l.city || "").toLowerCase().includes(cityF);
+        return mN && mZ && mD;
+    }).forEach(l => {
+        const v = l.isBx ? (currentLang === 'nl' ? communesNL[l.commune] : l.commune) : l.city;
+       
+        // --- LIEN DE RECHERCHE OFFICIEL ---
+        const query = encodeURIComponent(`${l.name}, ${l.addr}, ${v}`);
+        const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7Cd397f218d56f456dc1f108de6fc15bbc%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071073406191550%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=%2B%2FCTesoLiSyyH4QK6bY%2BeFDUI3fzLj8VaC2M0dWQLw8%3D&reserved=0{query}`;
+       
+        let badgeText = l.type;
+        if(l.type.includes("Hôtel") || l.type.includes("Hotel")) badgeText = dict[currentLang].optHotel;
+        else if(l.type.includes("Restaurant")) badgeText = dict[currentLang].optResto;
+        else if(l.type.includes("Café")) badgeText = dict[currentLang].optCafe;
+        else if(l.type.includes("Culture")) badgeText = dict[currentLang].optCult;
+        else if(l.type.includes("Autre") || l.type.includes("Andere")) badgeText = dict[currentLang].optOther;
 
-                area.innerHTML += `
-                    <div class="result-item">
-                        <div class="action-btns">
-                            <button class="action-btn edit-btn" onclick="chargerModification(${l.id})">${dict[currentLang].editBtn}</button>
-                            <button class="action-btn delete-btn" onclick="supprimer(${l.id})">${dict[currentLang].delBtn}</button>
-                        </div>
-                        <span class="badge">${badgeText}</span>
-                        <h3>${l.name}</h3>
-                        <p>📍 ${l.addr}, ${v}</p>
-                        ${l.comment ? `<span class="comment-text">💬 ${l.comment}</span>` : ""}
-                        <a href="${mapUrl}" target="_blank" class="map-link">${dict[currentLang].mapLink}</a>
-                    </div>`;
-            });
-        }
+        area.innerHTML += `
+            <div class="result-item">
+                <div class="action-btns">
+                    <button class="action-btn edit-btn" onclick="chargerModification(${l.id})">${dict[currentLang].editBtn}</button>
+                    <button class="action-btn delete-btn" onclick="supprimer(${l.id})">${dict[currentLang].delBtn}</button>
+                </div>
+                <span class="badge">${badgeText}</span>
+                <h3>${l.name}</h3>
+                <p>📍 ${l.addr}, ${v}</p>
+                ${l.comment ? `<span class="comment-text">💬 ${l.comment}</span>` : ""}
+                <a href="${mapUrl}" target="_blank" class="map-link">${dict[currentLang].mapLink}</a>
+            </div>`;
+    });
+}
 
         function ajouterLieu() {
             const n = document.getElementById('addName').value; const a = document.getElementById('addAddr').value;
@@ -324,3 +329,4 @@
     </script>
 </body>
 </html>
+
