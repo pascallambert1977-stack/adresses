@@ -74,16 +74,14 @@
         <h2 id="formTitle">➕ Ajouter</h2>
         <input type="hidden" id="editId">
         <label id="nameLabel">Nom :</label><input type="text" id="addName">
-       
         <label id="typeLabel">Type :</label>
         <select id="addType">
-            <option id="optResto" value="🍴 Restaurant">🍴 Restaurant</option>
-            <option id="optCafe" value="☕ Café / Bar">☕ Café / Bar</option>
-            <option id="optHotel" value="🏨 Hôtel">🏨 Hôtel</option>
-            <option id="optCult" value="🎭 Culture / Loisir">🎭 Culture / Loisir</option>
-            <option id="optOther" value="📍 Autre">📍 Autre</option>
+            <option value="🍴 Restaurant">🍴 Restaurant</option>
+            <option value="☕ Café / Bar">☕ Café / Bar</option>
+            <option value="🏨 Hôtel">🏨 Hôtel</option>
+            <option value="🎭 Culture">🎭 Culture</option>
+            <option value="📍 Autre">📍 Autre</option>
         </select>
-
         <label id="zoneLabel">Zone :</label>
         <select id="addIsBx" onchange="toggleFormAdd()">
             <option id="optBxYes" value="oui">Bruxelles</option>
@@ -91,10 +89,8 @@
         </select>
         <div id="addBoxBx"><label id="communeLabel">Commune :</label><select id="addCommune"></select></div>
         <div id="addBoxHors" style="display:none"><label id="cityLabel">Ville :</label><input type="text" id="addCity"></div>
-       
         <label id="addrLabel">Adresse :</label><input type="text" id="addAddr">
         <label id="noteLabel">Note :</label><input type="text" id="addComment">
-       
         <button class="btn" id="submitBtn" onclick="ajouterLieu()">Enregistrer</button>
         <button class="btn btn-alt" id="cancelEditBtn" style="display:none;" onclick="resetForm()">Annuler</button>
     </div>
@@ -107,8 +103,7 @@
                 importBtn: "📂 Import", closeBtn: "Fermer", searchTitle: "🔍 Rechercher", searchNamePlace: "Taper un nom...",
                 zoneDefault: "-- Choisir une zone --", zoneAll: "🌍 Toutes les adresses", zoneBx: "🇧🇪 Bruxelles", zoneHors: "🚗 Hors Bruxelles",
                 searchCityPlace: "Ville ?", addTitle: "➕ Ajouter une adresse", editTitle: "📝 Modifier l'adresse", nameLabel: "Nom :",
-                typeLabel: "Type :", optResto: "🍴 Restaurant", optCafe: "☕ Café / Bar", optHotel: "🏨 Hôtel", optCult: "🎭 Culture / Loisir",
-                optOther: "📍 Autre", zoneLabel: "Zone :", bxYes: "Bruxelles", bxNo: "Hors Bruxelles", communeLabel: "Commune :",
+                typeLabel: "Type :", zoneLabel: "Zone :", bxYes: "Bruxelles", bxNo: "Hors Bruxelles", communeLabel: "Commune :",
                 allCommunes: "Toutes les communes", cityLabel: "Ville :", addrLabel: "Adresse :", noteLabel: "Note personnelle :",
                 saveBtn: "Enregistrer", updateBtn: "Mettre à jour",
                 cancelBtn: "Annuler", editBtn: "Modifier", delBtn: "Supprimer", mapLink: "🗺️ Itinéraire Maps",
@@ -119,9 +114,8 @@
                 bgLabel: "🖼️ Achtergrond :", colorLabel: "🎨 Kleur :", exportBtn: "💾 Export",
                 importBtn: "📂 Import", closeBtn: "Sluiten", searchTitle: "🔍 Zoeken", searchNamePlace: "Naam typen...",
                 zoneDefault: "-- Kies een zone --", zoneAll: "🌍 Alle adressen", zoneBx: "🇧🇪 Brussel", zoneHors: "🚗 Buiten Brussel",
-                searchCityPlace: "Stad ?", addTitle: "➕ Toevoegen", editTitle: "📝 Bewerken", nameLabel: "Nom :",
-                typeLabel: "Type :", optResto: "🍴 Restaurant", optCafe: "☕ Café / Bar", optHotel: "🏨 Hotel", optCult: "🎭 Cultuur / Vrije Tijd",
-                optOther: "📍 Andere", zoneLabel: "Zone :", bxYes: "Brussel", bxNo: "Buiten Brussel", communeLabel: "Gemeente :",
+                searchCityPlace: "Stad ?", addTitle: "➕ Toevoegen", editTitle: "📝 Bewerken", nameLabel: "Naam :",
+                typeLabel: "Type :", zoneLabel: "Zone :", bxYes: "Brussel", bxNo: "Buiten Brussel", communeLabel: "Gemeente :",
                 allCommunes: "Alle gemeenten", cityLabel: "Stad :", addrLabel: "Adres :", noteLabel: "Notitie :",
                 saveBtn: "Opslaan", updateBtn: "Bijwerken",
                 cancelBtn: "Annuleren", editBtn: "Bewerken", delBtn: "Wissen", mapLink: "🗺️ Route Maps",
@@ -131,11 +125,14 @@
 
         const communesNL = {"Anderlecht":"Anderlecht","Auderghem":"Oudergem","Berchem-Sainte-Agathe":"Sint-Agatha-Berchem","Bruxelles-Ville":"Stad Brussel","Etterbeek":"Etterbeek","Evere":"Evere","Forest":"Vorst","Ganshoren":"Ganshoren","Ixelles":"Elsene","Jette":"Jette","Koekelberg":"Koekelberg","Molenbeek-Saint-Jean":"Sint-Jans-Molenbeek","Saint-Gilles":"Sint-Gillis","Saint-Josse-ten-Noode":"Sint-Joost-ten-Node","Schaerbeek":"Schaarbeek","Uccle":"Ukkel","Watermael-Boitsfort":"Watermaal-Bosvoorde","Woluwe-Saint-Lambert":"Sint-Lambrechts-Woluwe","Woluwe-Saint-Pierre":"Sint-Pieters-Woluwe"};
        
-        let database = JSON.parse(localStorage.getItem('monCarnetFinal')) || [];
+        // --- VOS DONNÉES INJECTÉES ICI ---
+        const initialData = [{"id":1771327244141,"name":"Ibis","type":"🏨 Hôtel","isBx":false,"commune":"Anderlecht","city":"Waterloo","addr":"Bd Henri Rolin 5A, 1410 Waterloo"},{"id":1771327277969,"name":"Musée de la BD","type":"🎭 Culture","isBx":true,"commune":"Bruxelles-Ville","city":"Waterloo","addr":"Rue des Sables 20, 1000 Bruxelles"},{"id":1771327366972,"name":"Hilton","type":"🏨 Hôtel","isBx":false,"commune":"Anderlecht","city":"Diegem","addr":"Culliganlaan 3A,bus00 1831 Diegem","comment":"Contacter Dries ou Pascal"},{"id":1771327463492,"name":"Léopold","type":"☕ Café","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Rue de Louvain 2, 1000 Bruxelles"},{"id":1771327556866,"name":"Lloyd Coffee Eatery","type":"☕ Café","isBx":true,"commune":"Ixelles","city":"Diegem","addr":"Av. de la Couronne 443, 1050 Ixelles"},{"id":1771327751797,"name":"Vonk","type":"📍 Autre","isBx":false,"commune":"Anderlecht","city":"Halle","addr":"Grote Markt 20, 1500 Halle","comment":"Très \"flamand\""},{"id":1771328980895,"name":"Foodmaker","type":"☕ Café","isBx":true,"commune":"Bruxelles-Ville","city":"Halle","addr":"Rue d'Arenberg 18, 1000 Bruxelles"},{"id":1771495740168,"name":"Grazie Mille","type":"🍴 Restaurant","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Av. Livingstone 31, 1000 Bruxelles","comment":""},{"id":1771496345286,"name":"The Beer Factory","type":"☕ Café / Bar","isBx":true,"commune":"Ixelles","city":"Diegem","addr":"Pl. du Luxembourg 6, 1050 Ixelles","comment":""},{"id":1771496410356,"name":"Hotel A&O","type":"🏨 Hôtel","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Bd Roi Albert II 44, 1000 Bruxelles","comment":""},{"id":1771496482340,"name":"Le petit Paris","type":"☕ Café / Bar","isBx":true,"commune":"Etterbeek","city":"Diegem","addr":"Rue Charles Degroux 2, 1040 Etterbeek","comment":""},{"id":1771496687696,"name":"Bar du Matin","type":"☕ Café / Bar","isBx":true,"commune":"Forest","city":"Diegem","addr":"Chau. d'Alsemberg 172, 1190 Forest","comment":""},{"id":1771496822330,"name":"Café Belga","type":"☕ Café / Bar","isBx":true,"commune":"Ixelles","city":"Diegem","addr":"Pl. Eugène Flagey 18, 1050 Ixelles","comment":""},{"id":1771499527329,"name":"Chicago Café","type":"☕ Café / Bar","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Rue de Flandre 45, 1000 Bruxelles","comment":""},{"id":1771500147658,"name":"JAT Café","type":"☕ Café / Bar","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Rue de Namur 28, 1000 Bruxelles","comment":""},{"id":1771500435133,"name":"Penta Hôtel","type":"🏨 Hôtel","isBx":true,"commune":"Saint-Gilles","city":"Diegem","addr":"Chau. de Charleroi 38, 1060 Bruxelles","comment":""},{"id":1771500494936,"name":"Motel One","type":"🏨 Hôtel","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Rue Royale 120, 1000 Bruxelles","comment":""},{"id":1771500701003,"name":"Brasserie By-Garden's 2000","type":"☕ Café / Bar","isBx":false,"commune":"Bruxelles-Ville","city":"Dilbeek","addr":"Alfons Gossetlaan 47, 1702 Dilbeek","comment":""},{"id":1771505559676,"name":"Chez Arthur","type":"☕ Café / Bar","isBx":true,"commune":"Auderghem","city":"Halle","addr":"Av. Daniel Boon 1, 1160 Auderghem","comment":""},{"id":1771505599529,"name":"French Riviera","type":"☕ Café / Bar","isBx":true,"commune":"Etterbeek","city":"Halle","addr":"Rue des Pervyse 80, 1040 Etterbeek ","comment":""},{"id":1771505646319,"name":"Le Traminot","type":"☕ Café / Bar","isBx":true,"commune":"Woluwe-Saint-Lambert","city":"Halle","addr":"Rue Martin V – 1200 Woluwe-St-Lambert","comment":"A 10 mètres de la gare Alma. Café/bistro. Dans le quartier des étudiants. Pas accessible en voiture ! "},{"id":1771505689257,"name":"Ibis","type":"🏨 Hôtel","isBx":true,"commune":"Anderlecht","city":"Halle","addr":"Route de Lennik 790, 1070 Anderlecht ","comment":"A 100 mètres de la gare Erasme. Bar du hôtel « Ibis ». Accessible à tout le monde (pas seulement pour les clients de l’hôtel. "},{"id":1771505737951,"name":"Pillows","type":"🏨 Hôtel","isBx":true,"commune":"Bruxelles-Ville","city":"Halle","addr":"Rue des Parroissiens 1, 1000 Bruxelles ","comment":"A 100 mètres de la Gare Central. Bar du hôtel « Pillows ». Accessible à tout le monde (pas seulement pour les clients de l’hôtel). A l’intérieur : très discret. "}];
+
+        let database = JSON.parse(localStorage.getItem('monCarnetFinal')) || initialData;
         let styles = JSON.parse(localStorage.getItem('monStyleFinal')) || { primary: '#800080', bgImg: '' };
         let currentLang = localStorage.getItem('monLangFinal') || 'fr';
 
-        window.onload = function() { applySavedStyles(); populateCommunes(); applyTranslations(); };
+        window.onload = function() { applySavedStyles(); populateCommunes(); applyTranslations(); rechercher(); };
 
         function populateCommunes() {
             const addSel = document.getElementById('addCommune');
@@ -175,11 +172,6 @@
             document.getElementById('searchCity').placeholder = l.searchCityPlace;
             document.getElementById('nameLabel').innerText = l.nameLabel;
             document.getElementById('typeLabel').innerText = l.typeLabel;
-            document.getElementById('optResto').innerText = l.optResto;
-            document.getElementById('optCafe').innerText = l.optCafe;
-            document.getElementById('optHotel').innerText = l.optHotel;
-            document.getElementById('optCult').innerText = l.optCult;
-            document.getElementById('optOther').innerText = l.optOther;
             document.getElementById('zoneLabel').innerText = l.zoneLabel;
             document.getElementById('optBxYes').innerText = l.bxYes;
             document.getElementById('optBxNo').innerText = l.bxNo;
@@ -192,21 +184,6 @@
             document.getElementById('submitBtn').innerText = isEdit ? l.updateBtn : l.saveBtn;
         }
 
-        function uploadFond(event) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                styles.bgImg = e.target.result;
-                document.documentElement.style.setProperty('--bg-image', `url('${styles.bgImg}')`);
-                localStorage.setItem('monStyleFinal', JSON.stringify(styles));
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-
-        function updateStyle(t, v) {
-            if (t === 'primary') { document.documentElement.style.setProperty('--primary', v); styles.primary = v; }
-            localStorage.setItem('monStyleFinal', JSON.stringify(styles));
-        }
-
         function applySavedStyles() {
             document.documentElement.style.setProperty('--primary', styles.primary);
             if(styles.bgImg) document.documentElement.style.setProperty('--bg-image', `url('${styles.bgImg}')`);
@@ -214,53 +191,41 @@
         }
 
         function rechercher() {
-    const zone = document.getElementById('searchZone').value;
-    const nameF = document.getElementById('searchName').value.trim().toLowerCase();
-    const cityF = document.getElementById('searchCity').value.toLowerCase();
-    const commF = document.getElementById('searchCommune').value;
-    const area = document.getElementById('displayArea');
-   
-    document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
-    document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
-   
-    if (zone === "rien" && nameF === "") { area.innerHTML = ""; return; }
-   
-    area.innerHTML = "";
-    database.filter(l => {
-        const mN = nameF === "" || l.name.toLowerCase().includes(nameF);
-        const mZ = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
-        let mD = true;
-        if(zone === 'bx' && commF !== 'toutes') mD = (l.commune === commF);
-        if(zone === 'hors') mD = (l.city || "").toLowerCase().includes(cityF);
-        return mN && mZ && mD;
-    }).forEach(l => {
-        const v = l.isBx ? (currentLang === 'nl' ? communesNL[l.commune] : l.commune) : l.city;
-       
-        // --- LE LIEN CORRIGÉ SANS TEXTE PARASITE ---
-        const query = encodeURIComponent(`${l.name}, ${l.addr}, ${v}`);
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
-        
-        let badgeText = l.type;
-        if(l.type.includes("Hôtel") || l.type.includes("Hotel")) badgeText = dict[currentLang].optHotel;
-        else if(l.type.includes("Restaurant")) badgeText = dict[currentLang].optResto;
-        else if(l.type.includes("Café")) badgeText = dict[currentLang].optCafe;
-        else if(l.type.includes("Culture")) badgeText = dict[currentLang].optCult;
-        else if(l.type.includes("Autre") || l.type.includes("Andere")) badgeText = dict[currentLang].optOther;
-
-        area.innerHTML += `
-            <div class="result-item">
-                <div class="action-btns">
-                    <button class="action-btn edit-btn" onclick="chargerModification(${l.id})">${dict[currentLang].editBtn}</button>
-                    <button class="action-btn delete-btn" onclick="supprimer(${l.id})">${dict[currentLang].delBtn}</button>
-                </div>
-                <span class="badge">${badgeText}</span>
-                <h3>${l.name}</h3>
-                <p>📍 ${l.addr}, ${v}</p>
-                ${l.comment ? `<span class="comment-text">💬 ${l.comment}</span>` : ""}
-                <a href="${mapUrl}" target="_blank" class="map-link">${dict[currentLang].mapLink}</a>
-            </div>`;
-    });
-}
+            const zone = document.getElementById('searchZone').value;
+            const nameF = document.getElementById('searchName').value.trim().toLowerCase();
+            const cityF = document.getElementById('searchCity').value.toLowerCase();
+            const commF = document.getElementById('searchCommune').value;
+            const area = document.getElementById('displayArea');
+            document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
+            document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
+            if (zone === "rien" && nameF === "") { area.innerHTML = ""; return; }
+            area.innerHTML = "";
+            database.filter(l => {
+                const mN = nameF === "" || l.name.toLowerCase().includes(nameF);
+                const mZ = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
+                let mD = true;
+                if(zone === 'bx' && commF !== 'toutes') mD = (l.commune === commF);
+                if(zone === 'hors') mD = (l.city || "").toLowerCase().includes(cityF);
+                return mN && mZ && mD;
+            }).forEach(l => {
+                const v = l.isBx ? (currentLang === 'nl' ? communesNL[l.commune] : l.commune) : l.city;
+                // LIEN GOOGLE MAPS OFFICIEL CORRIGÉ
+                const q = encodeURIComponent(l.name + ", " + l.addr + ", " + v);
+                const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C474e7eecf58941a46a9908de6fb6e896%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071028526267708%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=yfHqEBKEI0cQZtHivtyHtV77lSoFNspXsc0HJKmLG3k%3D&reserved=0{q}`;
+                area.innerHTML += `
+                    <div class="result-item">
+                        <div class="action-btns">
+                            <button class="action-btn edit-btn" onclick="chargerModification(${l.id})">${dict[currentLang].editBtn}</button>
+                            <button class="action-btn delete-btn" onclick="supprimer(${l.id})">${dict[currentLang].delBtn}</button>
+                        </div>
+                        <span class="badge">${l.type}</span>
+                        <h3>${l.name}</h3>
+                        <p>📍 ${l.addr}, ${v}</p>
+                        ${l.comment ? `<span class="comment-text">💬 ${l.comment}</span>` : ""}
+                        <a href="${mapUrl}" target="_blank" class="map-link">${dict[currentLang].mapLink}</a>
+                    </div>`;
+            });
+        }
 
         function ajouterLieu() {
             const n = document.getElementById('addName').value; const a = document.getElementById('addAddr').value;
@@ -277,8 +242,7 @@
             const l = database.find(lieu => lieu.id === id);
             document.getElementById('editId').value = l.id;
             document.getElementById('addName').value = l.name;
-            // On gère la rétro-compatibilité si l'ancien type était Boutique
-            document.getElementById('addType').value = (l.type.includes("Boutique") || l.type.includes("Winkel")) ? "🏨 Hôtel" : l.type;
+            document.getElementById('addType').value = l.type;
             document.getElementById('addIsBx').value = l.isBx ? 'oui' : 'non';
             toggleFormAdd();
             if(l.isBx) document.getElementById('addCommune').value = l.commune;
@@ -312,8 +276,6 @@
                         localStorage.setItem('monCarnetFinal', JSON.stringify(database));
                         rechercher();
                         alert(dict[currentLang].alertImp);
-                    } else {
-                        alert("Format incorrect.");
                     }
                 } catch (err) { alert("Erreur."); }
             };
@@ -329,7 +291,3 @@
     </script>
 </body>
 </html>
-
-
-
-
