@@ -2,331 +2,211 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Lieu de contact</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lieu de contact - V18 Fixed</title>
     <style>
-        :root { --primary: #800080; --bg-color: #fdfafc; --bg-image: none; }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-color);
-            background-image: var(--bg-image);
-            background-size: cover; background-attachment: fixed; background-position: center;
-            max-width: 800px; margin: 0 auto; padding: 20px; color: #333; transition: 0.3s;
-        }
-        .card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #eee; backdrop-filter: blur(5px); }
-        h1 { color: var(--primary); text-align: center; font-variant: small-caps; text-shadow: 1px 1px 2px white; clear: both; }
-        .settings-panel { display: none; background: #fff; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.2); clear: both; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-size: 16px; border-radius: 10px; font-weight: bold; margin-top: 10px; transition: 0.2s; text-align: center; }
-        .btn-alt { background: #4a4a4a; font-size: 0.85em; }
-        .btn-settings { background: white; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 8px 15px; font-size: 0.8em; border-radius: 8px; cursor: pointer; float: right; margin-left: 10px; }
-        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); position: relative; animation: fadeIn 0.3s; }
-        .badge { background: #f3e5f5; color: var(--primary); padding: 3px 8px; border-radius: 5px; font-size: 0.7em; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: inline-block; }
-        .action-btns { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; }
-        .action-btn { background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.75em; padding: 0; }
-        .delete-btn { color: #ff4d4d; }
-        .edit-btn { color: #4a90e2; }
-        .comment-text { font-style: italic; color: #666; font-size: 0.9em; margin-top: 8px; display: block; border-top: 1px solid #eee; padding-top: 5px; }
-        .map-link { display: inline-block; margin-top: 10px; color: var(--primary); font-weight: bold; text-decoration: none; border: 1px solid var(--primary); padding: 5px 10px; border-radius: 5px; font-size: 0.8em; }
-        label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; color: #555; }
-        select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        :root { --primary: #800080; --bg: #fdfafc; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 700px; margin: 0 auto; }
+        h1 { color: var(--primary); text-align: center; font-variant: small-caps; }
+       
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn-settings { float: right; background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 8px; cursor: pointer; }
+       
+        /* Liste des résultats */
+        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); position: relative; }
+        .badge { background: #f3e5f5; color: var(--primary); padding: 3px 8px; border-radius: 5px; font-size: 0.7em; font-weight: bold; text-transform: uppercase; }
+       
+        /* Boutons d'action sur la fiche */
+        .actions { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; }
+        .btn-edit { color: #4a90e2; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.85em; }
+        .btn-del { color: #ff4d4d; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.85em; }
+       
+        /* Bouton Maps */
+        .btn-maps { display: block; background: var(--primary); color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px; }
+       
+        /* Formulaire */
+        label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div>
-        <button id="btnSettings" class="btn-settings" onclick="toggleSettings()">⚙️ Réglages</button>
-        <button id="langToggleBtn" class="btn-settings" onclick="toggleLanguage()">🇳🇱 NL</button>
-    </div>
-   
-    <h1 id="mainTitle">🔮 Lieu de contact</h1>
-
-    <div id="settings" class="settings-panel">
-        <h2 id="configTitle" style="margin-top:0;">Configuration</h2>
-        <label id="bgLabel">Fond d'écran :</label>
-        <input type="file" accept="image/*" onchange="uploadFond(event)">
-        <label id="colorLabel">Couleur :</label>
-        <input type="color" id="themeColor" onchange="updateStyle('primary', this.value)">
-        <hr>
-        <div style="display: flex; gap: 10px;">
-            <button id="btnExport" class="btn btn-alt" onclick="exporterDonnees()">💾 Export</button>
-            <button id="btnImport" class="btn btn-alt" onclick="document.getElementById('fileIn').click()">📂 Import</button>
-        </div>
-        <input type="file" id="fileIn" style="display:none" onchange="importerDonnees(event)">
-        <button id="btnClose" class="btn" style="background:#000;" onclick="toggleSettings()">Fermer</button>
-    </div>
+<div class="container">
+    <button class="btn-settings" onclick="switchLang()" id="langBtn">🇳🇱 NL</button>
+    <h1 id="appTitle">🔮 Lieu de contact</h1>
 
     <div class="card">
-        <h2 id="searchTitle">🔍 Rechercher</h2>
-        <input type="text" id="searchName" placeholder="..." onkeyup="rechercher()">
-        <select id="searchZone" onchange="rechercher()" style="margin-top:10px;">
-            <option id="optZoneRien" value="rien">-- Zone --</option>
-            <option id="optZoneTous" value="tous">🌍 Toutes</option>
-            <option id="optZoneBx" value="bx">🇧🇪 Bruxelles</option>
-            <option id="optZoneHors" value="hors">🚗 Hors Bruxelles</option>
+        <h3 id="searchTitle">🔍 Rechercher</h3>
+        <input type="text" id="searchInput" placeholder="Nom..." onkeyup="refresh()">
+        <select id="searchZone" onchange="refresh()" style="margin-top:10px;">
+            <option value="tous" id="optAll">🌍 Toutes les zones</option>
+            <option value="bx">🇧🇪 Bruxelles</option>
+            <option value="hors">🚗 Hors Bruxelles</option>
         </select>
-        <div id="searchCommuneBox" style="display:none;"><select id="searchCommune" onchange="rechercher()"></select></div>
-        <div id="searchCityBox" style="display:none;"><input type="text" id="searchCity" onkeyup="rechercher()"></div>
     </div>
 
-    <div id="displayArea"></div>
+    <div id="results"></div>
 
-    <div class="card" id="addSection" style="border-top: 6px solid #FFD700;">
+    <div class="card" id="formSection" style="border-top: 5px solid #FFD700;">
         <h2 id="formTitle">➕ Ajouter</h2>
         <input type="hidden" id="editId">
-        <label id="nameLabel">Nom :</label><input type="text" id="addName">
        
-        <label id="typeLabel">Type :</label>
-        <select id="addType">
-            <option id="optResto" value="🍴 Restaurant">🍴 Restaurant</option>
-            <option id="optCafe" value="☕ Café / Bar">☕ Café / Bar</option>
-            <option id="optHotel" value="🏨 Hôtel">🏨 Hôtel</option>
-            <option id="optCult" value="🎭 Culture / Loisir">🎭 Culture / Loisir</option>
-            <option id="optOther" value="📍 Autre">📍 Autre</option>
+        <label>Nom :</label><input type="text" id="f-name">
+       
+        <label>Zone :</label>
+        <select id="f-isbx" onchange="toggleZone()">
+            <option value="oui">Bruxelles</option>
+            <option value="non">Hors Bruxelles</option>
         </select>
 
-        <label id="zoneLabel">Zone :</label>
-        <select id="addIsBx" onchange="toggleFormAdd()">
-            <option id="optBxYes" value="oui">Bruxelles</option>
-            <option id="optBxNo" value="non">Hors Bruxelles</option>
-        </select>
-        <div id="addBoxBx"><label id="communeLabel">Commune :</label><select id="addCommune"></select></div>
-        <div id="addBoxHors" style="display:none"><label id="cityLabel">Ville :</label><input type="text" id="addCity"></div>
+        <div id="box-bx"><label>Commune :</label><select id="f-commune"></select></div>
+        <div id="box-hors" style="display:none"><label>Ville :</label><input type="text" id="f-city"></div>
+
+        <label>Adresse :</label><input type="text" id="f-addr">
+        <label>Note :</label><textarea id="f-note" rows="2"></textarea>
        
-        <label id="addrLabel">Adresse :</label><input type="text" id="addAddr">
-        <label id="noteLabel">Note :</label><input type="text" id="addComment">
-       
-        <button class="btn" id="submitBtn" onclick="ajouterLieu()">Enregistrer</button>
-        <button class="btn btn-alt" id="cancelEditBtn" style="display:none;" onclick="resetForm()">Annuler</button>
+        <button class="btn-save" id="btnSubmit" onclick="save()">Enregistrer</button>
+        <button id="btnCancel" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Annuler</button>
     </div>
+</div>
 
-    <script>
-        const dict = {
-            fr: {
-                title: "🔮 Lieu de contact", settingsBtn: "⚙️ Réglages", configTitle: "Configuration",
-                bgLabel: "🖼️ Fond d'écran :", colorLabel: "🎨 Couleur :", exportBtn: "💾 Export",
-                importBtn: "📂 Import", closeBtn: "Fermer", searchTitle: "🔍 Rechercher", searchNamePlace: "Taper un nom...",
-                zoneDefault: "-- Choisir une zone --", zoneAll: "🌍 Toutes les adresses", zoneBx: "🇧🇪 Bruxelles", zoneHors: "🚗 Hors Bruxelles",
-                searchCityPlace: "Ville ?", addTitle: "➕ Ajouter une adresse", editTitle: "📝 Modifier l'adresse", nameLabel: "Nom :",
-                typeLabel: "Type :", optResto: "🍴 Restaurant", optCafe: "☕ Café / Bar", optHotel: "🏨 Hôtel", optCult: "🎭 Culture / Loisir",
-                optOther: "📍 Autre", zoneLabel: "Zone :", bxYes: "Bruxelles", bxNo: "Hors Bruxelles", communeLabel: "Commune :",
-                allCommunes: "Toutes les communes", cityLabel: "Ville :", addrLabel: "Adresse :", noteLabel: "Note personnelle :",
-                saveBtn: "Enregistrer", updateBtn: "Mettre à jour",
-                cancelBtn: "Annuler", editBtn: "Modifier", delBtn: "Supprimer", mapLink: "🗺️ Itinéraire Maps",
-                confirmDel: "Supprimer ?", alertReq: "Nom et adresse requis", alertAdd: "Ajouté !", alertUpd: "Mis à jour !", alertImp: "Importation finie !"
-            },
-            nl: {
-                title: "🔮 Contactplaats", settingsBtn: "⚙️ Instellingen", configTitle: "Configuratie",
-                bgLabel: "🖼️ Achtergrond :", colorLabel: "🎨 Kleur :", exportBtn: "💾 Export",
-                importBtn: "📂 Import", closeBtn: "Sluiten", searchTitle: "🔍 Zoeken", searchNamePlace: "Naam typen...",
-                zoneDefault: "-- Kies een zone --", zoneAll: "🌍 Alle adressen", zoneBx: "🇧🇪 Brussel", zoneHors: "🚗 Buiten Brussel",
-                searchCityPlace: "Stad ?", addTitle: "➕ Toevoegen", editTitle: "📝 Bewerken", nameLabel: "Nom :",
-                typeLabel: "Type :", optResto: "🍴 Restaurant", optCafe: "☕ Café / Bar", optHotel: "🏨 Hotel", optCult: "🎭 Cultuur / Vrije Tijd",
-                optOther: "📍 Andere", zoneLabel: "Zone :", bxYes: "Brussel", bxNo: "Buiten Brussel", communeLabel: "Gemeente :",
-                allCommunes: "Alle gemeenten", cityLabel: "Stad :", addrLabel: "Adres :", noteLabel: "Notitie :",
-                saveBtn: "Opslaan", updateBtn: "Bijwerken",
-                cancelBtn: "Annuleren", editBtn: "Bewerken", delBtn: "Wissen", mapLink: "🗺️ Route Maps",
-                confirmDel: "Wissen ?", alertReq: "Naam en adres verplicht", alertAdd: "Toegevoegd !", alertUpd: "Bijgewerkt !", alertImp: "Import klaar !"
-            }
+<script>
+    const communes = ["Anderlecht","Auderghem","Berchem-Sainte-Agathe","Bruxelles-Ville","Etterbeek","Evere","Forest","Ganshoren","Ixelles","Jette","Koekelberg","Molenbeek-Saint-Jean","Saint-Gilles","Saint-Josse-ten-Noode","Schaerbeek","Uccle","Watermael-Boitsfort","Woluwe-Saint-Lambert","Woluwe-Saint-Pierre"];
+   
+    const tr = {
+        fr: { app: "🔮 Lieu de contact", search: "🔍 Rechercher", all: "🌍 Toutes les zones", add: "➕ Ajouter", edit: "📝 Modifier", maps: "🗺️ Itinéraire Maps", save: "Enregistrer", update: "Mettre à jour" },
+        nl: { app: "🔮 Contactplaats", search: "🔍 Zoeken", all: "🌍 Alle zones", add: "➕ Toevoegen", edit: "📝 Bewerken", maps: "🗺️ Route Maps", save: "Opslaan", update: "Bijwerken" }
+    };
+
+    let lang = localStorage.getItem('lang_v18') || 'fr';
+    let database = JSON.parse(localStorage.getItem('data_v18')) || [];
+
+    function init() {
+        const sel = document.getElementById('f-commune');
+        communes.forEach(c => sel.add(new Option(c, c)));
+        applyLang();
+        refresh();
+    }
+
+    function switchLang() {
+        lang = lang === 'fr' ? 'nl' : 'fr';
+        localStorage.setItem('lang_v18', lang);
+        applyLang();
+        refresh();
+    }
+
+    function applyLang() {
+        const l = tr[lang];
+        document.getElementById('appTitle').innerText = l.app;
+        document.getElementById('searchTitle').innerText = l.search;
+        document.getElementById('optAll').innerText = l.all;
+        document.getElementById('langBtn').innerText = lang === 'fr' ? '🇳🇱 NL' : '🇫🇷 FR';
+        document.getElementById('btnSubmit').innerText = document.getElementById('editId').value ? l.update : l.save;
+    }
+
+    function toggleZone() {
+        const isBx = document.getElementById('f-isbx').value === 'oui';
+        document.getElementById('box-bx').style.display = isBx ? 'block' : 'none';
+        document.getElementById('box-hors').style.display = isBx ? 'none' : 'block';
+    }
+
+    function refresh() {
+        const list = document.getElementById('results');
+        const sName = document.getElementById('searchInput').value.toLowerCase();
+        const sZone = document.getElementById('searchZone').value;
+        list.innerHTML = "";
+
+        database.filter(i => {
+            const mName = i.name.toLowerCase().includes(sName);
+            const mZone = (sZone === 'tous') || (sZone === 'bx' && i.isBx) || (sZone === 'hors' && !i.isBx);
+            return mName && mZone;
+        }).forEach(i => {
+            const lieu = i.isBx ? i.commune : i.city;
+           
+            // --- FIX MAPS : URL DE RECHERCHE OFFICIELLE ---
+            const query = encodeURIComponent(`${i.name} ${i.addr} ${lieu}`);
+            const mapsUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C98e408b895fa43b0bb3f08de6fc239ea%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071077158886817%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=vwkhIvm3rjQGR0VeUZo46i5DmvNpiK2Sp97qwnHDynE%3D&reserved=0{query}`;
+
+            list.innerHTML += `
+                <div class="result-item">
+                    <div class="actions">
+                        <button class="btn-edit" onclick="loadEdit(${i.id})">${tr[lang].edit}</button>
+                        <button class="btn-del" onclick="del(${i.id})">X</button>
+                    </div>
+                    <h3>${i.name}</h3>
+                    <p>📍 ${i.addr}, ${lieu}</p>
+                    ${i.note ? `<p style="font-style:italic; color:gray;">💬 ${i.note}</p>` : ''}
+                    <a href="${mapsUrl}" target="_blank" class="btn-maps">${tr[lang].maps}</a>
+                </div>`;
+        });
+    }
+
+    function save() {
+        const id = document.getElementById('editId').value;
+        const name = document.getElementById('f-name').value;
+        const addr = document.getElementById('f-addr').value;
+        if(!name || !addr) return alert("Nom et Adresse obligatoires");
+
+        const obj = {
+            id: id ? parseInt(id) : Date.now(),
+            name: name,
+            isBx: document.getElementById('f-isbx').value === 'oui',
+            commune: document.getElementById('f-commune').value,
+            city: document.getElementById('f-city').value,
+            addr: addr,
+            note: document.getElementById('f-note').value
         };
 
-        const communesNL = {"Anderlecht":"Anderlecht","Auderghem":"Oudergem","Berchem-Sainte-Agathe":"Sint-Agatha-Berchem","Bruxelles-Ville":"Stad Brussel","Etterbeek":"Etterbeek","Evere":"Evere","Forest":"Vorst","Ganshoren":"Ganshoren","Ixelles":"Elsene","Jette":"Jette","Koekelberg":"Koekelberg","Molenbeek-Saint-Jean":"Sint-Jans-Molenbeek","Saint-Gilles":"Sint-Gillis","Saint-Josse-ten-Noode":"Sint-Joost-ten-Node","Schaerbeek":"Schaarbeek","Uccle":"Ukkel","Watermael-Boitsfort":"Watermaal-Bosvoorde","Woluwe-Saint-Lambert":"Sint-Lambrechts-Woluwe","Woluwe-Saint-Pierre":"Sint-Pieters-Woluwe"};
-       
-        let database = JSON.parse(localStorage.getItem('monCarnetFinal')) || [];
-        let styles = JSON.parse(localStorage.getItem('monStyleFinal')) || { primary: '#800080', bgImg: '' };
-        let currentLang = localStorage.getItem('monLangFinal') || 'fr';
-
-        window.onload = function() { applySavedStyles(); populateCommunes(); applyTranslations(); };
-
-        function populateCommunes() {
-            const addSel = document.getElementById('addCommune');
-            const searchSel = document.getElementById('searchCommune');
-            addSel.innerHTML = ""; searchSel.innerHTML = "";
-            searchSel.add(new Option(dict[currentLang].allCommunes, "toutes"));
-            Object.keys(communesNL).sort().forEach(c => {
-                const name = currentLang === 'nl' ? communesNL[c] : c;
-                addSel.add(new Option(name, c));
-                searchSel.add(new Option(name, c));
-            });
+        if(id) {
+            const idx = database.findIndex(x => x.id === parseInt(id));
+            database[idx] = obj;
+        } else {
+            database.push(obj);
         }
 
-        function toggleLanguage() {
-            currentLang = currentLang === 'fr' ? 'nl' : 'fr';
-            localStorage.setItem('monLangFinal', currentLang);
-            populateCommunes(); applyTranslations(); rechercher();
+        localStorage.setItem('data_v18', JSON.stringify(database));
+        resetForm();
+        refresh();
+    }
+
+    function loadEdit(id) {
+        const i = database.find(x => x.id === id);
+        document.getElementById('editId').value = i.id;
+        document.getElementById('f-name').value = i.name;
+        document.getElementById('f-isbx').value = i.isBx ? 'oui' : 'non';
+        toggleZone();
+        document.getElementById('f-commune').value = i.commune;
+        document.getElementById('f-city').value = i.city;
+        document.getElementById('f-addr').value = i.addr;
+        document.getElementById('f-note').value = i.note;
+        document.getElementById('formTitle').innerText = tr[lang].edit;
+        document.getElementById('btnCancel').style.display = 'block';
+        document.getElementById('formSection').scrollIntoView({behavior: 'smooth'});
+        applyLang();
+    }
+
+    function resetForm() {
+        document.getElementById('editId').value = "";
+        document.getElementById('f-name').value = "";
+        document.getElementById('f-addr').value = "";
+        document.getElementById('f-note').value = "";
+        document.getElementById('formTitle').innerText = tr[lang].add;
+        document.getElementById('btnCancel').style.display = 'none';
+        applyLang();
+    }
+
+    function del(id) {
+        if(confirm("Supprimer ?")) {
+            database = database.filter(x => x.id !== id);
+            localStorage.setItem('data_v18', JSON.stringify(database));
+            refresh();
         }
+    }
 
-        function applyTranslations() {
-            const l = dict[currentLang];
-            document.getElementById('langToggleBtn').innerText = currentLang === 'fr' ? '🇳🇱 NL' : '🇫🇷 FR';
-            document.getElementById('mainTitle').innerText = l.title;
-            document.getElementById('btnSettings').innerText = l.settingsBtn;
-            document.getElementById('configTitle').innerText = l.configTitle;
-            document.getElementById('bgLabel').innerText = l.bgLabel;
-            document.getElementById('colorLabel').innerText = l.colorLabel;
-            document.getElementById('btnExport').innerText = l.exportBtn;
-            document.getElementById('btnImport').innerText = l.importBtn;
-            document.getElementById('btnClose').innerText = l.closeBtn;
-            document.getElementById('searchTitle').innerText = l.searchTitle;
-            document.getElementById('searchName').placeholder = l.searchNamePlace;
-            document.getElementById('optZoneRien').innerText = l.zoneDefault;
-            document.getElementById('optZoneTous').innerText = l.zoneAll;
-            document.getElementById('optZoneBx').innerText = l.zoneBx;
-            document.getElementById('optZoneHors').innerText = l.zoneHors;
-            document.getElementById('searchCity').placeholder = l.searchCityPlace;
-            document.getElementById('nameLabel').innerText = l.nameLabel;
-            document.getElementById('typeLabel').innerText = l.typeLabel;
-            document.getElementById('optResto').innerText = l.optResto;
-            document.getElementById('optCafe').innerText = l.optCafe;
-            document.getElementById('optHotel').innerText = l.optHotel;
-            document.getElementById('optCult').innerText = l.optCult;
-            document.getElementById('optOther').innerText = l.optOther;
-            document.getElementById('zoneLabel').innerText = l.zoneLabel;
-            document.getElementById('optBxYes').innerText = l.bxYes;
-            document.getElementById('optBxNo').innerText = l.bxNo;
-            document.getElementById('communeLabel').innerText = l.communeLabel;
-            document.getElementById('cityLabel').innerText = l.cityLabel;
-            document.getElementById('addrLabel').innerText = l.addrLabel;
-            document.getElementById('noteLabel').innerText = l.noteLabel;
-            const isEdit = document.getElementById('editId').value !== "";
-            document.getElementById('formTitle').innerText = isEdit ? l.editTitle : l.addTitle;
-            document.getElementById('submitBtn').innerText = isEdit ? l.updateBtn : l.saveBtn;
-        }
+    init();
+</script>
 
-        function uploadFond(event) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                styles.bgImg = e.target.result;
-                document.documentElement.style.setProperty('--bg-image', `url('${styles.bgImg}')`);
-                localStorage.setItem('monStyleFinal', JSON.stringify(styles));
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-
-        function updateStyle(t, v) {
-            if (t === 'primary') { document.documentElement.style.setProperty('--primary', v); styles.primary = v; }
-            localStorage.setItem('monStyleFinal', JSON.stringify(styles));
-        }
-
-        function applySavedStyles() {
-            document.documentElement.style.setProperty('--primary', styles.primary);
-            if(styles.bgImg) document.documentElement.style.setProperty('--bg-image', `url('${styles.bgImg}')`);
-            document.getElementById('themeColor').value = styles.primary;
-        }
-
-        function rechercher() {
-    const zone = document.getElementById('searchZone').value;
-    const nameF = document.getElementById('searchName').value.trim().toLowerCase();
-    const cityF = document.getElementById('searchCity').value.toLowerCase();
-    const commF = document.getElementById('searchCommune').value;
-    const area = document.getElementById('displayArea');
-   
-    document.getElementById('searchCommuneBox').style.display = (zone === 'bx') ? 'block' : 'none';
-    document.getElementById('searchCityBox').style.display = (zone === 'hors') ? 'block' : 'none';
-   
-    if (zone === "rien" && nameF === "") { area.innerHTML = ""; return; }
-   
-    area.innerHTML = "";
-    database.filter(l => {
-        const mN = nameF === "" || l.name.toLowerCase().includes(nameF);
-        const mZ = (zone === 'tous') || (zone === 'bx' && l.isBx) || (zone === 'hors' && !l.isBx);
-        let mD = true;
-        if(zone === 'bx' && commF !== 'toutes') mD = (l.commune === commF);
-        if(zone === 'hors') mD = (l.city || "").toLowerCase().includes(cityF);
-        return mN && mZ && mD;
-    }).forEach(l => {
-        const v = l.isBx ? (currentLang === 'nl' ? communesNL[l.commune] : l.commune) : l.city;
-       
-        // --- LIEN DE RECHERCHE OFFICIEL ---
-        const query = encodeURIComponent(`${l.name}, ${l.addr}, ${v}`);
-        const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7Cd397f218d56f456dc1f108de6fc15bbc%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071073406191550%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=%2B%2FCTesoLiSyyH4QK6bY%2BeFDUI3fzLj8VaC2M0dWQLw8%3D&reserved=0{query}`;
-       
-        let badgeText = l.type;
-        if(l.type.includes("Hôtel") || l.type.includes("Hotel")) badgeText = dict[currentLang].optHotel;
-        else if(l.type.includes("Restaurant")) badgeText = dict[currentLang].optResto;
-        else if(l.type.includes("Café")) badgeText = dict[currentLang].optCafe;
-        else if(l.type.includes("Culture")) badgeText = dict[currentLang].optCult;
-        else if(l.type.includes("Autre") || l.type.includes("Andere")) badgeText = dict[currentLang].optOther;
-
-        area.innerHTML += `
-            <div class="result-item">
-                <div class="action-btns">
-                    <button class="action-btn edit-btn" onclick="chargerModification(${l.id})">${dict[currentLang].editBtn}</button>
-                    <button class="action-btn delete-btn" onclick="supprimer(${l.id})">${dict[currentLang].delBtn}</button>
-                </div>
-                <span class="badge">${badgeText}</span>
-                <h3>${l.name}</h3>
-                <p>📍 ${l.addr}, ${v}</p>
-                ${l.comment ? `<span class="comment-text">💬 ${l.comment}</span>` : ""}
-                <a href="${mapUrl}" target="_blank" class="map-link">${dict[currentLang].mapLink}</a>
-            </div>`;
-    });
-}
-
-        function ajouterLieu() {
-            const n = document.getElementById('addName').value; const a = document.getElementById('addAddr').value;
-            const editId = document.getElementById('editId').value;
-            if(!n || !a) return alert(dict[currentLang].alertReq);
-            const data = { id: editId ? parseInt(editId) : Date.now(), name: n, type: document.getElementById('addType').value, isBx: document.getElementById('addIsBx').value==='oui', commune: document.getElementById('addCommune').value, city: document.getElementById('addCity').value, addr: a, comment: document.getElementById('addComment').value };
-            if (editId) { database[database.findIndex(l => l.id === parseInt(editId))] = data; alert(dict[currentLang].alertUpd); }
-            else { database.push(data); alert(dict[currentLang].alertAdd); }
-            localStorage.setItem('monCarnetFinal', JSON.stringify(database));
-            resetForm(); rechercher();
-        }
-
-        function chargerModification(id) {
-            const l = database.find(lieu => lieu.id === id);
-            document.getElementById('editId').value = l.id;
-            document.getElementById('addName').value = l.name;
-            // On gère la rétro-compatibilité si l'ancien type était Boutique
-            document.getElementById('addType').value = (l.type.includes("Boutique") || l.type.includes("Winkel")) ? "🏨 Hôtel" : l.type;
-            document.getElementById('addIsBx').value = l.isBx ? 'oui' : 'non';
-            toggleFormAdd();
-            if(l.isBx) document.getElementById('addCommune').value = l.commune;
-            else document.getElementById('addCity').value = l.city;
-            document.getElementById('addAddr').value = l.addr;
-            document.getElementById('addComment').value = l.comment || "";
-            applyTranslations();
-            document.getElementById('cancelEditBtn').style.display = "block";
-            document.getElementById('addSection').scrollIntoView({behavior: "smooth"});
-        }
-
-        function resetForm() {
-            document.getElementById('editId').value = ""; document.getElementById('addName').value = ""; document.getElementById('addAddr').value = ""; document.getElementById('addComment').value = "";
-            applyTranslations(); document.getElementById('cancelEditBtn').style.display = "none";
-        }
-
-        function supprimer(id) { if(confirm(dict[currentLang].confirmDel)) { database = database.filter(l => l.id !== id); localStorage.setItem('monCarnetFinal', JSON.stringify(database)); rechercher(); } }
-       
-        function exporterDonnees() {
-            const blob = new Blob([JSON.stringify(database)], {type: "application/json"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "lieu_de_contact.json"; a.click();
-        }
-
-        function importerDonnees(event) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data)) {
-                        database = data;
-                        localStorage.setItem('monCarnetFinal', JSON.stringify(database));
-                        rechercher();
-                        alert(dict[currentLang].alertImp);
-                    } else {
-                        alert("Format incorrect.");
-                    }
-                } catch (err) { alert("Erreur."); }
-            };
-            reader.readAsText(event.target.files[0]);
-        }
-
-        function toggleSettings() { const s = document.getElementById('settings'); s.style.display = (s.style.display === 'block') ? 'none' : 'block'; }
-        function toggleFormAdd() {
-            const isBx = document.getElementById('addIsBx').value === 'oui';
-            document.getElementById('addBoxBx').style.display = isBx ? 'block' : 'none';
-            document.getElementById('addBoxHors').style.display = isBx ? 'none' : 'block';
-        }
-    </script>
 </body>
 </html>
-
