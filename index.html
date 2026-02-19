@@ -74,14 +74,16 @@
         <h2 id="formTitle">➕ Ajouter</h2>
         <input type="hidden" id="editId">
         <label id="nameLabel">Nom :</label><input type="text" id="addName">
+       
         <label id="typeLabel">Type :</label>
         <select id="addType">
-            <option value="🍴 Restaurant">🍴 Restaurant</option>
-            <option value="☕ Café / Bar">☕ Café / Bar</option>
-            <option value="🛍️ Hôtel">🛍️ Hôtel</option>
-            <option value="🎭 Culture / Loisir">🎭 Culture / Loisir</option>
-            <option value="📍 Autre">📍 Autre</option>
+            <option id="optResto" value="🍴 Restaurant">🍴 Restaurant</option>
+            <option id="optCafe" value="☕ Café / Bar">☕ Café / Bar</option>
+            <option id="optHotel" value="🏨 Hôtel">🏨 Hôtel</option>
+            <option id="optCult" value="🎭 Culture / Loisir">🎭 Culture / Loisir</option>
+            <option id="optOther" value="📍 Autre">📍 Autre</option>
         </select>
+
         <label id="zoneLabel">Zone :</label>
         <select id="addIsBx" onchange="toggleFormAdd()">
             <option id="optBxYes" value="oui">Bruxelles</option>
@@ -89,8 +91,10 @@
         </select>
         <div id="addBoxBx"><label id="communeLabel">Commune :</label><select id="addCommune"></select></div>
         <div id="addBoxHors" style="display:none"><label id="cityLabel">Ville :</label><input type="text" id="addCity"></div>
+       
         <label id="addrLabel">Adresse :</label><input type="text" id="addAddr">
         <label id="noteLabel">Note :</label><input type="text" id="addComment">
+       
         <button class="btn" id="submitBtn" onclick="ajouterLieu()">Enregistrer</button>
         <button class="btn btn-alt" id="cancelEditBtn" style="display:none;" onclick="resetForm()">Annuler</button>
     </div>
@@ -103,9 +107,10 @@
                 importBtn: "📂 Import", closeBtn: "Fermer", searchTitle: "🔍 Rechercher", searchNamePlace: "Taper un nom...",
                 zoneDefault: "-- Choisir une zone --", zoneAll: "🌍 Toutes les adresses", zoneBx: "🇧🇪 Bruxelles", zoneHors: "🚗 Hors Bruxelles",
                 searchCityPlace: "Ville ?", addTitle: "➕ Ajouter une adresse", editTitle: "📝 Modifier l'adresse", nameLabel: "Nom :",
-                typeLabel: "Type :", zoneLabel: "Zone :", bxYes: "Bruxelles", bxNo: "Hors Bruxelles", communeLabel: "Commune :",
+                typeLabel: "Type :", optResto: "🍴 Restaurant", optCafe: "☕ Café / Bar", optHotel: "🏨 Hôtel", optCult: "🎭 Culture / Loisir",
+                optOther: "📍 Autre", zoneLabel: "Zone :", bxYes: "Bruxelles", bxNo: "Hors Bruxelles", communeLabel: "Commune :",
                 allCommunes: "Toutes les communes", cityLabel: "Ville :", addrLabel: "Adresse :", noteLabel: "Note personnelle :",
-                notePlace: "Ex: Terrasse...", saveBtn: "Enregistrer", updateBtn: "Mettre à jour",
+                saveBtn: "Enregistrer", updateBtn: "Mettre à jour",
                 cancelBtn: "Annuler", editBtn: "Modifier", delBtn: "Supprimer", mapLink: "🗺️ Itinéraire Maps",
                 confirmDel: "Supprimer ?", alertReq: "Nom et adresse requis", alertAdd: "Ajouté !", alertUpd: "Mis à jour !", alertImp: "Importation finie !"
             },
@@ -114,10 +119,11 @@
                 bgLabel: "🖼️ Achtergrond :", colorLabel: "🎨 Kleur :", exportBtn: "💾 Export",
                 importBtn: "📂 Import", closeBtn: "Sluiten", searchTitle: "🔍 Zoeken", searchNamePlace: "Naam typen...",
                 zoneDefault: "-- Kies een zone --", zoneAll: "🌍 Alle adressen", zoneBx: "🇧🇪 Brussel", zoneHors: "🚗 Buiten Brussel",
-                searchCityPlace: "Stad ?", addTitle: "➕ Toevoegen", editTitle: "📝 Bewerken", nameLabel: "Naam :",
-                typeLabel: "Type :", zoneLabel: "Zone :", bxYes: "Brussel", bxNo: "Buiten Brussel", communeLabel: "Gemeente :",
+                searchCityPlace: "Stad ?", addTitle: "➕ Toevoegen", editTitle: "📝 Bewerken", nameLabel: "Nom :",
+                typeLabel: "Type :", optResto: "🍴 Restaurant", optCafe: "☕ Café / Bar", optHotel: "🏨 Hotel", optCult: "🎭 Cultuur / Vrije Tijd",
+                optOther: "📍 Andere", zoneLabel: "Zone :", bxYes: "Brussel", bxNo: "Buiten Brussel", communeLabel: "Gemeente :",
                 allCommunes: "Alle gemeenten", cityLabel: "Stad :", addrLabel: "Adres :", noteLabel: "Notitie :",
-                notePlace: "Bijv: Terras...", saveBtn: "Opslaan", updateBtn: "Bijwerken",
+                saveBtn: "Opslaan", updateBtn: "Bijwerken",
                 cancelBtn: "Annuleren", editBtn: "Bewerken", delBtn: "Wissen", mapLink: "🗺️ Route Maps",
                 confirmDel: "Wissen ?", alertReq: "Naam en adres verplicht", alertAdd: "Toegevoegd !", alertUpd: "Bijgewerkt !", alertImp: "Import klaar !"
             }
@@ -169,6 +175,11 @@
             document.getElementById('searchCity').placeholder = l.searchCityPlace;
             document.getElementById('nameLabel').innerText = l.nameLabel;
             document.getElementById('typeLabel').innerText = l.typeLabel;
+            document.getElementById('optResto').innerText = l.optResto;
+            document.getElementById('optCafe').innerText = l.optCafe;
+            document.getElementById('optHotel').innerText = l.optHotel;
+            document.getElementById('optCult').innerText = l.optCult;
+            document.getElementById('optOther').innerText = l.optOther;
             document.getElementById('zoneLabel').innerText = l.zoneLabel;
             document.getElementById('optBxYes').innerText = l.bxYes;
             document.getElementById('optBxNo').innerText = l.bxNo;
@@ -176,7 +187,6 @@
             document.getElementById('cityLabel').innerText = l.cityLabel;
             document.getElementById('addrLabel').innerText = l.addrLabel;
             document.getElementById('noteLabel').innerText = l.noteLabel;
-            document.getElementById('addComment').placeholder = l.notePlace;
             const isEdit = document.getElementById('editId').value !== "";
             document.getElementById('formTitle').innerText = isEdit ? l.editTitle : l.addTitle;
             document.getElementById('submitBtn').innerText = isEdit ? l.updateBtn : l.saveBtn;
@@ -222,14 +232,23 @@
                 return mN && mZ && mD;
             }).forEach(l => {
                 const v = l.isBx ? (currentLang === 'nl' ? communesNL[l.commune] : l.commune) : l.city;
-                const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7Cadbcf46c762146f8940908de6fa495bc%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639070949867587639%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=QoFj2sArpFYXuv2FQyBH0gJzM2dB4pGo27in7HdvTbo%3D&reserved=0{encodeURIComponent(l.name + ' ' + l.addr + ' ' + v)}`;
+                const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C5614dafe0dc446e952a308de6fa74cf2%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639070961490833579%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=R%2Fkv9OXu15UlxnD1SqV3MP3ZGoRFT5oKUJpLMdDE%2BiQ%3D&reserved=0{encodeURIComponent(l.name + ' ' + l.addr + ' ' + v)}`;
+               
+                // On s'assure que le badge affiche le texte traduit selon la sélection actuelle
+                let badgeText = l.type;
+                if(l.type.includes("Hôtel") || l.type.includes("Hotel")) badgeText = dict[currentLang].optHotel;
+                else if(l.type.includes("Restaurant")) badgeText = dict[currentLang].optResto;
+                else if(l.type.includes("Café")) badgeText = dict[currentLang].optCafe;
+                else if(l.type.includes("Culture")) badgeText = dict[currentLang].optCult;
+                else if(l.type.includes("Autre") || l.type.includes("Andere")) badgeText = dict[currentLang].optOther;
+
                 area.innerHTML += `
                     <div class="result-item">
                         <div class="action-btns">
                             <button class="action-btn edit-btn" onclick="chargerModification(${l.id})">${dict[currentLang].editBtn}</button>
                             <button class="action-btn delete-btn" onclick="supprimer(${l.id})">${dict[currentLang].delBtn}</button>
                         </div>
-                        <span class="badge">${l.type}</span>
+                        <span class="badge">${badgeText}</span>
                         <h3>${l.name}</h3>
                         <p>📍 ${l.addr}, ${v}</p>
                         ${l.comment ? `<span class="comment-text">💬 ${l.comment}</span>` : ""}
@@ -253,7 +272,8 @@
             const l = database.find(lieu => lieu.id === id);
             document.getElementById('editId').value = l.id;
             document.getElementById('addName').value = l.name;
-            document.getElementById('addType').value = l.type;
+            // On gère la rétro-compatibilité si l'ancien type était Boutique
+            document.getElementById('addType').value = (l.type.includes("Boutique") || l.type.includes("Winkel")) ? "🏨 Hôtel" : l.type;
             document.getElementById('addIsBx').value = l.isBx ? 'oui' : 'non';
             toggleFormAdd();
             if(l.isBx) document.getElementById('addCommune').value = l.commune;
@@ -277,21 +297,20 @@
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "lieu_de_contact.json"; a.click();
         }
 
-        // FONCTION D'IMPORTATION RÉPARÉE
         function importerDonnees(event) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
                     if (Array.isArray(data)) {
-                        database = data; // On remplace par le contenu du fichier
+                        database = data;
                         localStorage.setItem('monCarnetFinal', JSON.stringify(database));
                         rechercher();
                         alert(dict[currentLang].alertImp);
                     } else {
-                        alert("Le fichier n'est pas au bon format.");
+                        alert("Format incorrect.");
                     }
-                } catch (err) { alert("Erreur de lecture du fichier."); }
+                } catch (err) { alert("Erreur."); }
             };
             reader.readAsText(event.target.files[0]);
         }
@@ -305,5 +324,3 @@
     </script>
 </body>
 </html>
-
-
