@@ -3,61 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Carnet d'Adresses</title>
+    <title>Lieu de Contact</title>
     <style>
-        :root { --primary: #800080; --accent: #FFD700; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+        :root { --primary: #800080; --secondary: #f3e5f5; --accent: #FFD700; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #fdfafc; margin: 0; padding: 15px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 20px; position: relative; }
-        h1 { color: var(--primary); margin: 10px 0; font-variant: small-caps; }
        
-        /* Boutons de contrôle */
-        .top-bar { display: flex; justify-content: space-between; margin-bottom: 15px; }
-        .btn-small { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8em; }
+        /* En-tête */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { color: var(--primary); font-size: 1.5em; margin: 0; font-variant: small-caps; }
+        .btn-top { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.9em; }
+
+        /* Cartes */
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #eee; }
+        .item { border-left: 6px solid var(--primary); position: relative; }
        
-        /* Cartes et Formulaires */
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 0.85em; font-weight: bold; margin-bottom: 4px; color: #555; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        /* Badges & Actions */
+        .badge { background: var(--secondary); color: var(--primary); padding: 3px 8px; border-radius: 5px; font-size: 0.75em; font-weight: bold; }
+        .actions { position: absolute; top: 10px; right: 10px; }
+        .btn-action { background: none; border: none; cursor: pointer; font-size: 0.8em; text-decoration: underline; }
+        .btn-edit { color: #007bff; }
+        .btn-del { color: #dc3545; margin-left: 8px; }
+
+        /* Formulaire */
+        .form-title { border-top: 3px solid var(--accent); padding-top: 15px; margin-top: 20px; }
+        label { display: block; font-size: 0.85em; font-weight: bold; margin: 10px 0 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
        
-        /* Résultats */
-        .result-card { background: white; padding: 15px; border-radius: 12px; border-left: 6px solid var(--primary); margin-bottom: 15px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .type-badge { font-size: 0.7em; font-weight: bold; background: #f0e6f0; color: var(--primary); padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
-        .actions { position: absolute; top: 15px; right: 15px; }
-        .btn-edit { color: #007bff; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.85em; }
-        .btn-del { color: #dc3545; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.85em; margin-left: 10px; }
-       
-        /* Boutons principaux */
-        .btn-main { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-maps { display: block; background: #28a745; color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 12px; }
-       
-        .settings-panel { display: none; background: #eee; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .note { font-style: italic; color: #666; font-size: 0.9em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px; }
+        /* Boutons */
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 1em; margin-top: 15px; cursor: pointer; }
+        .btn-maps { display: block; background: #28a745; color: white; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px; font-size: 0.95em; }
+        .comment { font-style: italic; color: #666; font-size: 0.9em; margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-bar">
-        <button class="btn-small" onclick="toggleSettings()">⚙️ Réglages</button>
-        <button id="langBtn" class="btn-small" onclick="switchLang()">🇳🇱 NL</button>
-    </div>
-
     <div class="header">
-        <h1 id="txt-title">🔮 Mes Lieux</h1>
-    </div>
-
-    <div id="settings" class="settings-panel">
-        <label>Couleur du thème :</label>
-        <input type="color" id="colorPicker" onchange="changeColor(this.value)">
-        <button class="btn-main" style="background:#444" onclick="exportData()">💾 Exporter mes données (JSON)</button>
+        <h1 id="txt-app-title">🔮 Lieu de contact</h1>
+        <div>
+            <button class="btn-top" onclick="switchLang()" id="btn-lang">🇳🇱 NL</button>
+            <button class="btn-top" onclick="exportData()">💾</button>
+        </div>
     </div>
 
     <div class="card">
-        <h3 id="txt-search-title">🔍 Recherche</h3>
-        <input type="text" id="searchInput" placeholder="Nom..." onkeyup="render()">
-        <select id="searchZone" onchange="render()" style="margin-top:10px;">
+        <input type="text" id="search" placeholder="Rechercher un nom..." onkeyup="render()">
+        <select id="filterZone" onchange="render()" style="margin-top:10px;">
             <option value="all">🌍 Toutes les zones</option>
             <option value="bx">🇧🇪 Bruxelles</option>
             <option value="hors">🚗 Hors Bruxelles</option>
@@ -66,114 +58,132 @@
 
     <div id="list"></div>
 
-    <div class="card" id="form-container" style="border-top: 4px solid var(--accent);">
-        <h3 id="txt-form-title">➕ Ajouter un lieu</h3>
+    <div class="card form-title" id="form-anchor">
+        <h2 id="txt-form-title" style="margin:0; font-size: 1.2em;">➕ Ajouter</h2>
         <input type="hidden" id="edit-id">
        
-        <div class="form-group">
-            <label id="txt-label-name">Nom de l'établissement</label>
-            <input type="text" id="f-name">
-        </div>
+        <label id="lbl-name">Nom</label>
+        <input type="text" id="f-name">
 
-        <div class="form-group">
-            <label>Type</label>
-            <select id="f-type">
-                <option value="🍴 Restaurant">🍴 Restaurant</option>
-                <option value="☕ Café / Bar">☕ Café / Bar</option>
-                <option value="🏨 Hôtel">🏨 Hôtel</option>
-                <option value="🎭 Culture">🎭 Culture</option>
-                <option value="📍 Autre">📍 Autre</option>
-            </select>
-        </div>
+        <label>Type</label>
+        <select id="f-type">
+            <option value="🍴 Restaurant">🍴 Restaurant</option>
+            <option value="☕ Café / Bar">☕ Café / Bar</option>
+            <option value="🏨 Hôtel">🏨 Hôtel</option>
+            <option value="🎭 Culture">🎭 Culture</option>
+            <option value="📍 Autre">📍 Autre</option>
+        </select>
 
-        <div class="form-group">
-            <label>Zone</label>
-            <select id="f-isbx" onchange="toggleFormZone()">
-                <option value="true">Bruxelles</option>
-                <option value="false">Hors Bruxelles</option>
-            </select>
-        </div>
+        <label>Zone</label>
+        <select id="f-isbx" onchange="toggleZoneField()">
+            <option value="true">Bruxelles</option>
+            <option value="false">Hors Bruxelles</option>
+        </select>
 
-        <div id="box-bx" class="form-group">
+        <div id="box-bx">
             <label>Commune</label>
             <select id="f-commune"></select>
         </div>
-
-        <div id="box-hors" class="form-group" style="display:none">
+        <div id="box-hors" style="display:none">
             <label>Ville</label>
             <input type="text" id="f-city">
         </div>
 
-        <div class="form-group">
-            <label>Adresse (Rue et numéro)</label>
-            <input type="text" id="f-addr">
-        </div>
+        <label>Adresse</label>
+        <input type="text" id="f-addr">
 
-        <div class="form-group">
-            <label>Note / Commentaire</label>
-            <textarea id="f-note" rows="2"></textarea>
-        </div>
+        <label>Note</label>
+        <textarea id="f-note" rows="2"></textarea>
 
-        <button class="btn-main" id="btn-save" onclick="save()">Enregistrer</button>
-        <button class="btn-main" id="btn-cancel" style="display:none; background:#888;" onclick="resetForm()">Annuler</button>
+        <button class="btn-save" id="btn-submit" onclick="save()">Enregistrer</button>
+        <button id="btn-cancel" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Annuler la modification</button>
     </div>
 </div>
 
 <script>
     const tr = {
-        fr: { title: "🔮 Mes Lieux", search: "🔍 Recherche", add: "➕ Ajouter un lieu", edit: "📝 Modifier le lieu", save: "Enregistrer", update: "Mettre à jour", name: "Nom", map: "🗺️ Ouvrir dans Google Maps", confirm: "Supprimer ce lieu ?", all: "🌍 Toutes les zones" },
-        nl: { title: "🔮 Mijn Plaatsen", search: "🔍 Zoeken", add: "➕ Plaats toevoegen", edit: "📝 Plaats bewerken", save: "Opslaan", update: "Bijwerken", name: "Naam", map: "🗺️ Openen in Google Maps", confirm: "Deze plaats verwijderen ?", all: "🌍 Alle zones" }
+        fr: { app: "🔮 Lieu de contact", search: "Rechercher...", all: "🌍 Toutes les zones", add: "➕ Ajouter", edit: "📝 Modifier", maps: "🗺️ Voir l'itinéraire Maps", save: "Enregistrer", update: "Mettre à jour", delConfirm: "Supprimer ?" },
+        nl: { app: "🔮 Contactplaats", search: "Zoeken...", all: "🌍 Alle zones", add: "➕ Toevoegen", edit: "📝 Bewerken", maps: "🗺️ Route plannen Maps", save: "Opslaan", update: "Bijwerken", delConfirm: "Wissen ?" }
     };
 
-    const communes = ["Anderlecht", "Auderghem", "Berchem-Sainte-Agathe", "Bruxelles-Ville", "Etterbeek", "Evere", "Forest", "Ganshoren", "Ixelles", "Jette", "Koekelberg", "Molenbeek-Saint-Jean", "Saint-Gilles", "Saint-Josse-ten-Noode", "Schaerbeek", "Uccle", "Watermael-Boitsfort", "Woluwe-Saint-Lambert", "Woluwe-Saint-Pierre"];
+    const communes = ["Anderlecht","Auderghem","Berchem-Sainte-Agathe","Bruxelles-Ville","Etterbeek","Evere","Forest","Ganshoren","Ixelles","Jette","Koekelberg","Molenbeek-Saint-Jean","Saint-Gilles","Saint-Josse-ten-Noode","Schaerbeek","Uccle","Watermael-Boitsfort","Woluwe-Saint-Lambert","Woluwe-Saint-Pierre"];
 
-    let state = {
-        lang: localStorage.getItem('app_lang') || 'fr',
-        color: localStorage.getItem('app_color') || '#800080',
-        data: JSON.parse(localStorage.getItem('app_data')) || []
-    };
+    const defaultData = [
+        {id:1, name:"Ibis Waterloo", type:"🏨 Hôtel", isbx:false, city:"Waterloo", addr:"Bd Henri Rolin 5A", note:""},
+        {id:2, name:"Musée BD", type:"🎭 Culture", isbx:true, commune:"Bruxelles-Ville", addr:"Rue des Sables 20", note:""},
+        {id:3, name:"Hilton Diegem", type:"🏨 Hôtel", isbx:false, city:"Diegem", addr:"Culliganlaan 3A", note:"Dries ou Pascal"}
+    ];
+
+    let lang = localStorage.getItem('lang_v29') || 'fr';
+    let data = JSON.parse(localStorage.getItem('data_v29')) || defaultData;
 
     function init() {
-        // Remplissage des communes
         const cSel = document.getElementById('f-commune');
         communes.forEach(c => cSel.add(new Option(c, c)));
-       
-        document.documentElement.style.setProperty('--primary', state.color);
-        document.getElementById('colorPicker').value = state.color;
-       
+        applyLang();
+        render();
+    }
+
+    function switchLang() {
+        lang = lang === 'fr' ? 'nl' : 'fr';
+        localStorage.setItem('lang_v29', lang);
         applyLang();
         render();
     }
 
     function applyLang() {
-        const l = tr[state.lang];
-        document.getElementById('txt-title').innerText = l.title;
-        document.getElementById('txt-search-title').innerText = l.search;
-        document.getElementById('langBtn').innerText = state.lang === 'fr' ? '🇳🇱 NL' : '🇫🇷 FR';
-        document.getElementById('btn-save').innerText = document.getElementById('edit-id').value ? l.update : l.save;
+        const t = tr[lang];
+        document.getElementById('txt-app-title').innerText = t.app;
+        document.getElementById('search').placeholder = t.search;
+        document.getElementById('btn-lang').innerText = lang === 'fr' ? '🇳🇱 NL' : '🇫🇷 FR';
+        document.getElementById('btn-submit').innerText = document.getElementById('edit-id').value ? t.update : t.save;
     }
 
-    function switchLang() {
-        state.lang = state.lang === 'fr' ? 'nl' : 'fr';
-        localStorage.setItem('app_lang', state.lang);
-        applyLang();
-        render();
-    }
-
-    function toggleFormZone() {
+    function toggleZoneField() {
         const isBx = document.getElementById('f-isbx').value === "true";
         document.getElementById('box-bx').style.display = isBx ? 'block' : 'none';
         document.getElementById('box-hors').style.display = isBx ? 'none' : 'block';
+    }
+
+    function render() {
+        const list = document.getElementById('list');
+        const searchVal = document.getElementById('search').value.toLowerCase();
+        const zoneVal = document.getElementById('filterZone').value;
+        list.innerHTML = "";
+
+        data.filter(item => {
+            const matchName = item.name.toLowerCase().includes(searchVal);
+            const matchZone = (zoneVal === 'all') || (zoneVal === 'bx' && item.isbx) || (zoneVal === 'hors' && !item.isbx);
+            return matchName && matchZone;
+        }).forEach(item => {
+            const lieuStr = item.isbx ? item.commune : item.city;
+            // LA SEULE URL GOOGLE MAPS QUI NE FAILLE JAMAIS
+            const mapsUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7Cf69714b6d3d34a76f06208de6fbf09cc%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071063459998389%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=GhG4mzHw5htgN9e%2Fw94tRSMzJaP0pmcVyuI%2BtmpseZA%3D&reserved=0{encodeURIComponent(item.name + " " + item.addr + " " + lieuStr)}`;
+
+            list.innerHTML += `
+                <div class="card item">
+                    <div class="actions">
+                        <button class="btn-action btn-edit" onclick="editItem(${item.id})">${tr[lang].edit}</button>
+                        <button class="btn-action btn-del" onclick="deleteItem(${item.id})">X</button>
+                    </div>
+                    <span class="badge">${item.type}</span>
+                    <h3 style="margin:10px 0 5px 0;">${item.name}</h3>
+                    <p style="margin:0; font-size:0.9em; color:#555;">📍 ${item.addr}, ${lieuStr}</p>
+                    ${item.note ? `<div class="comment">💬 ${item.note}</div>` : ''}
+                    <a href="${mapsUrl}" target="_blank" class="btn-maps">${tr[lang].maps}</a>
+                </div>
+            `;
+        });
     }
 
     function save() {
         const id = document.getElementById('edit-id').value;
         const name = document.getElementById('f-name').value;
         const addr = document.getElementById('f-addr').value;
-       
-        if(!name || !addr) return alert("Nom et adresse obligatoires !");
 
-        const entry = {
+        if (!name || !addr) return alert("Nom et Adresse requis !");
+
+        const newItem = {
             id: id ? parseInt(id) : Date.now(),
             name: name,
             type: document.getElementById('f-type').value,
@@ -184,65 +194,33 @@
             note: document.getElementById('f-note').value
         };
 
-        if(id) {
-            const index = state.data.findIndex(item => item.id === parseInt(id));
-            state.data[index] = entry;
+        if (id) {
+            const idx = data.findIndex(i => i.id === parseInt(id));
+            data[idx] = newItem;
         } else {
-            state.data.push(entry);
+            data.push(newItem);
         }
 
-        localStorage.setItem('app_data', JSON.stringify(state.data));
+        localStorage.setItem('data_v29', JSON.stringify(data));
         resetForm();
         render();
     }
 
-    function render() {
-        const list = document.getElementById('list');
-        const search = document.getElementById('searchInput').value.toLowerCase();
-        const zone = document.getElementById('searchZone').value;
-        list.innerHTML = "";
-
-        const filtered = state.data.filter(item => {
-            const mName = item.name.toLowerCase().includes(search);
-            const mZone = (zone === 'all') || (zone === 'bx' && item.isbx) || (zone === 'hors' && !item.isbx);
-            return mName && mZone;
-        });
-
-        filtered.forEach(item => {
-            const ville = item.isbx ? item.commune : item.city;
-            // LE LIEN GOOGLE MAPS - FORMAT LE PLUS STABLE
-            const mapUrl = "https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%3Fq%3D&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C934481783c104b5b11df08de6fbe8934%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071061309505396%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=fALYFu%2FVQp2r3OHMjbOWceQrgmkexU%2FY12ccUNg%2BqNQ%3D&reserved=0" + encodeURIComponent(item.name + " " + item.addr + " " + ville);
-           
-            list.innerHTML += `
-                <div class="result-card">
-                    <div class="actions">
-                        <button class="btn-edit" onclick="edit(${item.id})">Modifier</button>
-                        <button class="btn-del" onclick="del(${item.id})">X</button>
-                    </div>
-                    <span class="type-badge">${item.type}</span>
-                    <h3 style="margin:8px 0 4px 0;">${item.name}</h3>
-                    <p style="margin:0; font-size:0.9em;">📍 ${item.addr}, ${ville}</p>
-                    ${item.note ? `<p class="note">💬 ${item.note}</p>` : ''}
-                    <a href="${mapUrl}" target="_blank" class="btn-maps">${tr[state.lang].map}</a>
-                </div>
-            `;
-        });
-    }
-
-    function edit(id) {
-        const item = state.data.find(i => i.id === id);
+    function editItem(id) {
+        const item = data.find(i => i.id === id);
         document.getElementById('edit-id').value = item.id;
         document.getElementById('f-name').value = item.name;
         document.getElementById('f-type').value = item.type;
         document.getElementById('f-isbx').value = item.isbx.toString();
-        toggleFormZone();
-        document.getElementById('f-commune').value = item.commune;
-        document.getElementById('f-city').value = item.city;
+        toggleZoneField();
+        document.getElementById('f-commune').value = item.commune || "";
+        document.getElementById('f-city').value = item.city || "";
         document.getElementById('f-addr').value = item.addr;
         document.getElementById('f-note').value = item.note;
-       
+
+        document.getElementById('txt-form-title').innerText = tr[lang].edit;
         document.getElementById('btn-cancel').style.display = "block";
-        document.getElementById('form-container').scrollIntoView({behavior: "smooth"});
+        document.getElementById('form-anchor').scrollIntoView({behavior: "smooth"});
         applyLang();
     }
 
@@ -251,41 +229,28 @@
         document.getElementById('f-name').value = "";
         document.getElementById('f-addr').value = "";
         document.getElementById('f-note').value = "";
+        document.getElementById('txt-form-title').innerText = tr[lang].add;
         document.getElementById('btn-cancel').style.display = "none";
         applyLang();
     }
 
-    function del(id) {
-        if(confirm(tr[state.lang].confirm)) {
-            state.data = state.data.filter(i => i.id !== id);
-            localStorage.setItem('app_data', JSON.stringify(state.data));
+    function deleteItem(id) {
+        if (confirm(tr[lang].delConfirm)) {
+            data = data.filter(i => i.id !== id);
+            localStorage.setItem('data_v29', JSON.stringify(data));
             render();
         }
     }
 
-    function changeColor(c) {
-        state.color = c;
-        localStorage.setItem('app_color', c);
-        document.documentElement.style.setProperty('--primary', c);
-    }
-
-    function toggleSettings() {
-        const s = document.getElementById('settings');
-        s.style.display = s.style.display === 'block' ? 'none' : 'block';
-    }
-
     function exportData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.data));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "mes_lieux.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+        const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "carnet_adresses.json";
+        a.click();
     }
 
     init();
 </script>
-
 </body>
 </html>
