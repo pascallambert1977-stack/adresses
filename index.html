@@ -112,3 +112,514 @@
         <input type="hidden" id="editId">
        
         <label for="f-name">Nom :</label>
+        <input type="text" id="f-name" required>
+
+        <label for="f-isbx">Zone :</label>
+        <select id="f-isbx" onchange="toggleZone()" aria-label="Sélection de la zone">
+            <option value="oui">Bruxelles</option>
+            <option value="non">Hors Bruxelles</option>
+        </select>
+
+        <div id="box-bx">
+            <label for="f-commune">Commune :</label>
+            <select id="f-commune"></select>
+        </div>
+        <div id="box-hors" style="display:none">
+            <label for="f-city">Ville :</label>
+            <input type="text" id="f-city" placeholder="Ville">
+        </div>
+
+        <label for="f-addr">Adresse :</label>
+        <input type="text" id="f-addr" required autocomplete="street-address" placeholder="Rue, numéro...">
+
+        <label for="f-note">Note :</label>
+        <textarea id="f-note" rows="2" placeholder="Infos complémentaires (optionnel)"></textarea>
+       
+        <button class="btn-save" id="btnSubmit" onclick="save()" title="Enregistrer la fiche">Enregistrer</button>
+        <button id="btnCancel" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Annuler</button>
+    </div>
+</div>
+
+<script>
+    // ----------------------
+    // Données & traductions
+    // ----------------------
+    const communes = ["Anderlecht","Auderghem","Berchem-Sainte-Agathe","Bruxelles-Ville","Etterbeek","Evere","Forest","Ganshoren","Ixelles","Jette","Koekelberg","Molenbeek-Saint-Jean","Saint-Gilles","Saint-Josse-ten-Noode","Schaerbeek","Uccle","Watermael-Boitsfort","Woluwe-Saint-Lambert","Woluwe-Saint-Pierre"];
+   
+    const tr = {
+        fr: {
+            app: "🔮 Lieu de contact",
+            search: "🔍 Rechercher",
+            all: "🌍 Toutes les zones",
+            add: "➕ Ajouter",
+            edit: "📝 Modifier",
+            maps: "🗺️ Ouvrir dans Maps",
+            save: "Enregistrer",
+            update: "Mettre à jour",
+            results: (n) => n === 0 ? "Aucun résultat" : n === 1 ? "1 résultat" : `${n} résultats`,
+            // Settings
+            settings: "⚙️ Réglages",
+            importExport: "Import / Export",
+            importMerge: "Importer (ajouter)",
+            importReplace: "Importer (remplacer)",
+            export: "Exporter JSON",
+            clear: "Vider la base",
+            theme: "Thème",
+            primaryColor: "Couleur principale",
+            bgColor: "Couleur de fond",
+            bgImage: "Image de fond (optionnel)",
+            removeImg: "Supprimer l’image",
+            resetTheme: "Réinitialiser le thème",
+            applyTheme: "Appliquer le thème",
+            storageNote: "⚠️ Les grandes images peuvent remplir rapidement le stockage local (~5 Mo de limite)."
+        },
+        nl: {
+            app: "🔮 Contactplaats",
+            search: "🔍 Zoeken",
+            all: "🌍 Alle zones",
+            add: "➕ Toevoegen",
+            edit: "📝 Bewerken",
+            maps: "🗺️ Openen in Maps",
+            save: "Opslaan",
+            update: "Bijwerken",
+            results: (n) => n === 0 ? "Geen resultaat" : n === 1 ? "1 resultaat" : `${n} resultaten`,
+            // Settings
+            settings: "⚙️ Instellingen",
+            importExport: "Import / Export",
+            importMerge: "Importeren (toevoegen)",
+            importReplace: "Importeren (vervangen)",
+            export: "JSON exporteren",
+            clear: "Basis wissen",
+            theme: "Thema",
+            primaryColor: "Primaire kleur",
+            bgColor: "Achtergrondkleur",
+            bgImage: "Achtergrondafbeelding (optioneel)",
+            removeImg: "Afbeelding verwijderen",
+            resetTheme: "Thema resetten",
+            applyTheme: "Thema toepassen",
+            storageNote: "⚠️ Grote afbeeldingen kunnen de lokale opslag snel vullen (~5 MB-limiet)."
+        }
+    };
+
+    // ----------------------
+    // Utils
+    // ----------------------
+    const LS_KEYS = {
+        lang: 'lang_v18',
+        data: 'data_v18',
+        q: 'search_q_v18',
+        zone: 'search_zone_v18',
+        themePrimary: 'theme_primary_v18',
+        themeBg: 'theme_bg_v18',
+        themeBgImg: 'theme_bgimg_v18'
+    };
+
+    function loadStorage(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+        } catch (e) {
+            console.warn('Lecture stockage échouée:', e);
+            return fallback;
+        }
+    }
+    function saveStorage(key, value) {
+        try {
+            const val = typeof value === 'string' ? value : JSON.stringify(value);
+            localStorage.setItem(key, val);
+        } catch (e) {
+            console.warn('Écriture stockage échouée:', e);
+            alert("Le stockage local est plein ou indisponible.");
+        }
+    }
+    function normalizeLower(s) {
+        return (s || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // retire diacritiques
+            .toLowerCase()
+            .trim();
+    }
+
+    function buildMapsUrl(item) {
+        const lieu = item.isBx ? item.commune : item.city;
+        const country = (lang === 'nl') ? 'België' : 'Belgique';
+        const q = `${item.name} ${item.addr}, ${lieu}, ${country}`;
+        const params = new URLSearchParams({
+            api: '1',
+            query: q,
+            hl: lang,
+            gl: 'BE'
+        });
+        return `https://www.google.com/maps/search/?${params.toString()}`;
+    }
+
+    // ----------------------
+    // État
+    // ----------------------
+    let lang = localStorage.getItem(LS_KEYS.lang) || 'fr';
+    let database = loadStorage(LS_KEYS.data, []);
+    let searchQ = localStorage.getItem(LS_KEYS.q) || '';
+    let searchZone = localStorage.getItem(LS_KEYS.zone) || 'tous';
+    let importMode = 'merge';
+
+    // Thème (valeurs par défaut si non sauvegardées)
+    let themePrimary = JSON.parse(localStorage.getItem(LS_KEYS.themePrimary) || '"#800080"');
+    let themeBg = JSON.parse(localStorage.getItem(LS_KEYS.themeBg) || '"#fdfafc"');
+    let themeBgImg = JSON.parse(localStorage.getItem(LS_KEYS.themeBgImg) || '""');
+
+    // ----------------------
+    // Cycle de vie
+    // ----------------------
+    function init() {
+        const sel = document.getElementById('f-commune');
+        communes.forEach(c => sel.add(new Option(c, c)));
+
+        // initialise recherche (persistée)
+        document.getElementById('searchInput').value = searchQ;
+        document.getElementById('searchZone').value = searchZone;
+
+        // Applique thème
+        applyTheme(themePrimary, themeBg, themeBgImg, false);
+        // Sync inputs réglages
+        syncThemeInputs();
+
+        toggleZone();
+        applyLang();
+        refresh();
+
+        // Listeners image de fond
+        document.getElementById('bgImage').addEventListener('change', onBgImageSelected);
+    }
+
+    function switchLang() {
+        lang = lang === 'fr' ? 'nl' : 'fr';
+        localStorage.setItem(LS_KEYS.lang, lang);
+        applyLang();
+        refresh();
+    }
+
+    function toggleSettings() {
+        // Le bouton ⚙️ garde la langue via clic droit/long si besoin : ici on ouvre/ferme le panneau
+        const panel = document.getElementById('settingsPanel');
+        const isOpen = panel.style.display === 'block';
+        panel.style.display = isOpen ? 'none' : 'block';
+        panel.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+    }
+
+    function applyLang() {
+        const l = tr[lang];
+        document.getElementById('appTitle').innerText = l.app;
+        document.getElementById('searchTitle').innerText = l.search;
+        document.getElementById('optAll').innerText = l.all;
+        document.getElementById('btnSubmit').innerText = document.getElementById('editId').value ? l.update : l.save;
+        document.getElementById('formTitle').innerText = document.getElementById('editId').value ? l.edit : l.add;
+
+        // Réglages
+        document.getElementById('settingsTitle').innerText = l.settings;
+        document.getElementById('importExportTitle').innerText = l.importExport;
+        document.getElementById('btnImportMerge').innerText = l.importMerge;
+        document.getElementById('btnImportReplace').innerText = l.importReplace;
+        document.getElementById('btnExport').innerText = l.export;
+        document.getElementById('btnClear').innerText = l.clear;
+
+        document.getElementById('themeTitle').innerText = l.theme;
+        document.getElementById('labelPrimary').innerText = l.primaryColor;
+        document.getElementById('labelBgColor').innerText = l.bgColor;
+        document.getElementById('labelBgImage').innerText = l.bgImage;
+        document.getElementById('btnRemoveImg').innerText = l.removeImg;
+        document.getElementById('btnResetTheme').innerText = l.resetTheme;
+        document.getElementById('btnApplyTheme').innerText = l.applyTheme;
+        document.getElementById('storageNote').innerText = l.storageNote;
+
+        updateResultsMeta(); // met à jour le compteur avec la bonne langue
+    }
+
+    function toggleZone() {
+        const isBx = document.getElementById('f-isbx').value === 'oui';
+        document.getElementById('box-bx').style.display = isBx ? 'block' : 'none';
+        document.getElementById('box-hors').style.display = isBx ? 'none' : 'block';
+    }
+
+    function onSearchChange() {
+        searchQ = document.getElementById('searchInput').value;
+        searchZone = document.getElementById('searchZone').value;
+        localStorage.setItem(LS_KEYS.q, searchQ);
+        localStorage.setItem(LS_KEYS.zone, searchZone);
+        refresh();
+    }
+
+    // ----------------------
+    // Thème
+    // ----------------------
+    function applyTheme(primary, bg, bgImg, persist = true) {
+        document.documentElement.style.setProperty('--primary', primary || '#800080');
+        document.documentElement.style.setProperty('--bg', bg || '#fdfafc');
+
+        if (bgImg) {
+            document.body.style.backgroundImage = `url('${bgImg}')`;
+        } else {
+            document.body.style.backgroundImage = 'none';
+        }
+
+        if (persist) {
+            localStorage.setItem(LS_KEYS.themePrimary, JSON.stringify(primary));
+            localStorage.setItem(LS_KEYS.themeBg, JSON.stringify(bg));
+            localStorage.setItem(LS_KEYS.themeBgImg, JSON.stringify(bgImg || ""));
+        }
+
+        // Mémorise en variables globales
+        themePrimary = primary;
+        themeBg = bg;
+        themeBgImg = bgImg || "";
+        // preview
+        updateBgPreview();
+    }
+
+    function syncThemeInputs() {
+        document.getElementById('primaryColor').value = themePrimary;
+        document.getElementById('bgColor').value = themeBg;
+        updateBgPreview();
+    }
+
+    function updateBgPreview() {
+        const prev = document.getElementById('bgPreview');
+        prev.style.backgroundImage = themeBgImg ? `url('${themeBgImg}')` : 'none';
+        prev.style.backgroundColor = themeBg;
+        prev.style.borderColor = themeBgImg ? '#aaa' : '#ccc';
+    }
+
+    function onBgImageSelected(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const dataUrl = reader.result; // base64
+            applyTheme(themePrimary, themeBg, dataUrl);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeBgImage() {
+        document.getElementById('bgImage').value = "";
+        applyTheme(themePrimary, themeBg, "");
+    }
+
+    function resetTheme() {
+        applyTheme('#800080', '#fdfafc', "");
+        syncThemeInputs();
+    }
+
+    function applyThemeFromInputs() {
+        const primary = document.getElementById('primaryColor').value || '#800080';
+        const bg = document.getElementById('bgColor').value || '#fdfafc';
+        applyTheme(primary, bg, themeBgImg);
+    }
+
+    // ----------------------
+    // Import / Export
+    // ----------------------
+    function exportData() {
+        const payload = { version: 1, items: database };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const date = new Date().toISOString().slice(0,10);
+        a.href = url;
+        a.download = `lieux-contact_${date}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    function triggerImport(mode) {
+        importMode = mode; // 'merge' | 'replace'
+        const inp = document.getElementById('fileInput');
+        inp.value = "";
+        inp.onchange = () => doImport(inp.files[0], importMode);
+        inp.click();
+    }
+
+    function doImport(file, mode) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const parsed = JSON.parse(reader.result);
+                const items = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : []);
+                if (!Array.isArray(items)) throw new Error("Format JSON invalide");
+
+                if (mode === 'replace') {
+                    database = [];
+                }
+                // merge avec anti-doublons
+                items.forEach(obj => {
+                    if (!obj || !obj.name || !obj.addr) return;
+                    const keyNew = `${normalizeLower(obj.name)}|${normalizeLower(obj.addr)}|${normalizeLower(obj.isBx ? obj.commune : obj.city)}`;
+                    const idx = database.findIndex(x =>
+                        `${normalizeLower(x.name)}|${normalizeLower(x.addr)}|${normalizeLower(x.isBx ? x.commune : x.city)}` === keyNew
+                    );
+                    const safe = {
+                        id: obj.id ? parseInt(obj.id) : Date.now() + Math.floor(Math.random()*1000),
+                        name: String(obj.name),
+                        isBx: !!obj.isBx,
+                        commune: obj.commune || '',
+                        city: obj.city || '',
+                        addr: String(obj.addr),
+                        note: obj.note || ''
+                    };
+                    if (idx !== -1) {
+                        database[idx] = safe;
+                    } else {
+                        database.push(safe);
+                    }
+                });
+
+                saveStorage(LS_KEYS.data, database);
+                refresh();
+                alert(lang === 'fr' ? 'Import terminé.' : 'Import voltooid.');
+            } catch (e) {
+                console.error(e);
+                alert((lang === 'fr' ? 'Erreur d’import : ' : 'Importfout: ') + e.message);
+            }
+        };
+        reader.readAsText(file, 'utf-8');
+    }
+
+    function clearData() {
+        if (confirm(lang === 'fr' ? "Vider la base ? Cette action est irréversible." : "Basis wissen? Deze actie is onomkeerbaar.")) {
+            database = [];
+            saveStorage(LS_KEYS.data, database);
+            refresh();
+        }
+    }
+
+    // ----------------------
+    // Rendu
+    // ----------------------
+    function updateResultsMeta(count = 0) {
+        const el = document.getElementById('resultsMeta');
+        el.textContent = tr[lang].results(count);
+    }
+
+    function refresh() {
+        const list = document.getElementById('results');
+        const sName = normalizeLower(document.getElementById('searchInput').value);
+        const sZone = document.getElementById('searchZone').value;
+        list.innerHTML = "";
+
+        const filtered = database.filter(i => {
+            const mName = normalizeLower(i.name).includes(sName);
+            const mZone = (sZone === 'tous') || (sZone === 'bx' && i.isBx) || (sZone === 'hors' && !i.isBx);
+            return mName && mZone;
+        }).sort((a, b) => normalizeLower(a.name).localeCompare(normalizeLower(b.name)));
+
+        updateResultsMeta(filtered.length);
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<div class="empty">${tr[lang].results(0)}</div>`;
+            return;
+        }
+
+        filtered.forEach(i => {
+            const lieu = i.isBx ? i.commune : i.city;
+            const mapsUrl = buildMapsUrl(i);
+
+            list.innerHTML += `
+                <div class="result-item">
+                    <div class="actions">
+                        <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
+                        <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
+                    </div>
+                    <h3>${i.name}</h3>
+                    <p>📍 ${i.addr}, ${lieu}</p>
+                    ${i.note ? `<p style="font-style:italic; color:gray;">💬 ${i.note}</p>` : ''}
+                    <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-maps">${tr[lang].maps}</a>
+                </div>`;
+        });
+    }
+
+    // ----------------------
+    // Données (CRUD)
+    // ----------------------
+    function save() {
+        const id = document.getElementById('editId').value;
+        const name = document.getElementById('f-name').value.trim();
+        const addr = document.getElementById('f-addr').value.trim();
+        const isBx = document.getElementById('f-isbx').value === 'oui';
+        const commune = document.getElementById('f-commune').value;
+        const city = document.getElementById('f-city').value.trim();
+        const note = document.getElementById('f-note').value;
+
+        if (!name || !addr) return alert("Nom et Adresse obligatoires");
+
+        const obj = {
+            id: id ? parseInt(id) : Date.now(),
+            name, isBx, commune, city, addr, note
+        };
+
+        // Anti-doublons: même nom + adresse + lieu
+        const key = `${normalizeLower(name)}|${normalizeLower(addr)}|${normalizeLower(isBx ? commune : city)}`;
+        const existingIdx = database.findIndex(x =>
+            `${normalizeLower(x.name)}|${normalizeLower(x.addr)}|${normalizeLower(x.isBx ? x.commune : x.city)}` === key
+        );
+
+        if (id) {
+            const idx = database.findIndex(x => x.id === parseInt(id));
+            if (idx !== -1) database[idx] = obj;
+        } else if (existingIdx !== -1) {
+            // si doublon, on met à jour la fiche existante
+            obj.id = database[existingIdx].id;
+            database[existingIdx] = obj;
+        } else {
+            database.push(obj);
+        }
+
+        saveStorage(LS_KEYS.data, database);
+        resetForm();
+        refresh();
+    }
+
+    function loadEdit(id) {
+        const i = database.find(x => x.id === id);
+        if (!i) return;
+        document.getElementById('editId').value = i.id;
+        document.getElementById('f-name').value = i.name;
+        document.getElementById('f-isbx').value = i.isBx ? 'oui' : 'non';
+        toggleZone();
+        document.getElementById('f-commune').value = i.commune;
+        document.getElementById('f-city').value = i.city;
+        document.getElementById('f-addr').value = i.addr;
+        document.getElementById('f-note').value = i.note || '';
+        document.getElementById('formTitle').innerText = tr[lang].edit;
+        document.getElementById('btnCancel').style.display = 'block';
+        document.getElementById('formSection').scrollIntoView({behavior: 'smooth'});
+        applyLang();
+    }
+
+    function resetForm() {
+        document.getElementById('editId').value = "";
+        document.getElementById('f-name').value = "";
+        document.getElementById('f-addr').value = "";
+        document.getElementById('f-note').value = "";
+        // on garde la zone choisie mais on rafraîchit l'affichage
+        toggleZone();
+        document.getElementById('formTitle').innerText = tr[lang].add;
+        document.getElementById('btnCancel').style.display = 'none';
+        applyLang();
+    }
+
+    function del(id) {
+        if (confirm("Supprimer ?")) {
+            database = database.filter(x => x.id !== id);
+            saveStorage(LS_KEYS.data, database);
+            refresh();
+        }
+    }
+
+    // start
+    init();
+</script>
+
+</body>
+</html>
