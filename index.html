@@ -25,7 +25,8 @@
         .delete-btn { color: #ff4d4d; }
         .edit-btn { color: #4a90e2; }
         .comment-text { font-style: italic; color: #666; font-size: 0.9em; margin-top: 8px; display: block; border-top: 1px solid #eee; padding-top: 5px; }
-        .map-link { display: inline-block; margin-top: 10px; color: var(--primary); font-weight: bold; text-decoration: none; border: 1px solid var(--primary); padding: 5px 10px; border-radius: 5px; font-size: 0.8em; }
+        .map-link { display: inline-block; margin-top: 10px; color: var(--primary); font-weight: bold; cursor: pointer; border: 1px solid var(--primary); padding: 5px 10px; border-radius: 5px; font-size: 0.8em; text-decoration: none; background: white; }
+        .map-link:hover { background: var(--primary); color: white; }
         label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; color: #555; }
         select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -107,27 +108,25 @@
                 allCommunes: "Toutes les communes", cityLabel: "Ville :", addrLabel: "Adresse :", noteLabel: "Note personnelle :",
                 saveBtn: "Enregistrer", updateBtn: "Mettre à jour",
                 cancelBtn: "Annuler", editBtn: "Modifier", delBtn: "Supprimer", mapLink: "🗺️ Itinéraire Maps",
-                confirmDel: "Supprimer ?", alertReq: "Nom et adresse requis", alertAdd: "Ajouté !", alertUpd: "Mis à jour !", alertImp: "Importation finie !"
+                confirmDel: "Supprimer ?", alertReq: "Nom et adresse requis"
             },
             nl: {
                 title: "🔮 Contactplaats", settingsBtn: "⚙️ Instellingen", configTitle: "Configuratie",
                 bgLabel: "🖼️ Achtergrond :", colorLabel: "🎨 Kleur :", exportBtn: "💾 Export",
                 importBtn: "📂 Import", closeBtn: "Sluiten", searchTitle: "🔍 Zoeken", searchNamePlace: "Naam typen...",
                 zoneDefault: "-- Choisir une zone --", zoneAll: "🌍 Alle adressen", zoneBx: "🇧🇪 Brussel", zoneHors: "🚗 Buiten Brussel",
-                searchCityPlace: "Stad ?", addTitle: "➕ Toevoegen", editTitle: "📝 Bewerken", nameLabel: "Naam :",
+                searchCityPlace: "Stad ?", addTitle: "➕ Toevoegen", editTitle: "📝 Bewerken", nameLabel: "Nom :",
                 typeLabel: "Type :", zoneLabel: "Zone :", bxYes: "Brussel", bxNo: "Buiten Brussel", communeLabel: "Gemeente :",
                 allCommunes: "Alle gemeenten", cityLabel: "Stad :", addrLabel: "Adres :", noteLabel: "Notitie :",
                 saveBtn: "Opslaan", updateBtn: "Bijwerken",
                 cancelBtn: "Annuleren", editBtn: "Bewerken", delBtn: "Wissen", mapLink: "🗺️ Route Maps",
-                confirmDel: "Wissen ?", alertReq: "Naam en adresse verplicht", alertAdd: "Toegevoegd !", alertUpd: "Bijgewerkt !", alertImp: "Import klaar !"
+                confirmDel: "Wissen ?", alertReq: "Naam en adresse verplicht"
             }
         };
 
         const communesNL = {"Anderlecht":"Anderlecht","Auderghem":"Oudergem","Berchem-Sainte-Agathe":"Sint-Agatha-Berchem","Bruxelles-Ville":"Stad Brussel","Etterbeek":"Etterbeek","Evere":"Evere","Forest":"Vorst","Ganshoren":"Ganshoren","Ixelles":"Elsene","Jette":"Jette","Koekelberg":"Koekelberg","Molenbeek-Saint-Jean":"Sint-Jans-Molenbeek","Saint-Gilles":"Sint-Gillis","Saint-Josse-ten-Noode":"Sint-Joost-ten-Node","Schaerbeek":"Schaarbeek","Uccle":"Ukkel","Watermael-Boitsfort":"Watermaal-Bosvoorde","Woluwe-Saint-Lambert":"Sint-Lambrechts-Woluwe","Woluwe-Saint-Pierre":"Sint-Pieters-Woluwe"};
        
-        const initialData = [{"id":1771327244141,"name":"Ibis","type":"🏨 Hôtel","isBx":false,"commune":"Anderlecht","city":"Waterloo","addr":"Bd Henri Rolin 5A, 1410 Waterloo"},{"id":1771327277969,"name":"Musée de la BD","type":"🎭 Culture","isBx":true,"commune":"Bruxelles-Ville","city":"Waterloo","addr":"Rue des Sables 20, 1000 Bruxelles"},{"id":1771327366972,"name":"Hilton","type":"🏨 Hôtel","isBx":false,"commune":"Anderlecht","city":"Diegem","addr":"Culliganlaan 3A,bus00 1831 Diegem","comment":"Contacter Dries ou Pascal"},{"id":1771327463492,"name":"Léopold","type":"☕ Café","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Rue de Louvain 2, 1000 Bruxelles"},{"id":1771327556866,"name":"Lloyd Coffee Eatery","type":"☕ Café","isBx":true,"commune":"Ixelles","city":"Diegem","addr":"Av. de la Couronne 443, 1050 Ixelles"},{"id":1771327751797,"name":"Vonk","type":"📍 Autre","isBx":false,"commune":"Anderlecht","city":"Halle","addr":"Grote Markt 20, 1500 Halle","comment":"Très flamand"},{"id":1771328980895,"name":"Foodmaker","type":"☕ Café","isBx":true,"commune":"Bruxelles-Ville","city":"Halle","addr":"Rue d'Arenberg 18, 1000 Bruxelles"},{"id":1771495740168,"name":"Grazie Mille","type":"🍴 Restaurant","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Av. Livingstone 31, 1000 Bruxelles","comment":""},{"id":1771496345286,"name":"The Beer Factory","type":"☕ Café / Bar","isBx":true,"commune":"Ixelles","city":"Diegem","addr":"Pl. du Luxembourg 6, 1050 Ixelles","comment":""},{"id":1771496410356,"name":"Hotel A&O","type":"🏨 Hôtel","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Bd Roi Albert II 44, 1000 Bruxelles","comment":""},{"id":1771496482340,"name":"Le petit Paris","type":"☕ Café / Bar","isBx":true,"commune":"Etterbeek","city":"Diegem","addr":"Rue Charles Degroux 2, 1040 Etterbeek","comment":""},{"id":1771496687696,"name":"Bar du Matin","type":"☕ Café / Bar","isBx":true,"commune":"Forest","city":"Diegem","addr":"Chau. d'Alsemberg 172, 1190 Forest","comment":""},{"id":1771496822330,"name":"Café Belga","type":"☕ Café / Bar","isBx":true,"commune":"Ixelles","city":"Diegem","addr":"Pl. Eugène Flagey 18, 1050 Ixelles","comment":""},{"id":1771499527329,"name":"Chicago Café","type":"☕ Café / Bar","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Rue de Flandre 45, 1000 Bruxelles","comment":""},{"id":1771500147658,"name":"JAT Café","type":"☕ Café / Bar","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Rue de Namur 28, 1000 Bruxelles","comment":""},{"id":1771500435133,"name":"Penta Hôtel","type":"🏨 Hôtel","isBx":true,"commune":"Saint-Gilles","city":"Diegem","addr":"Chau. de Charleroi 38, 1060 Bruxelles","comment":""},{"id":1771500494936,"name":"Motel One","type":"🏨 Hôtel","isBx":true,"commune":"Bruxelles-Ville","city":"Diegem","addr":"Rue Royale 120, 1000 Bruxelles","comment":""},{"id":1771500701003,"name":"Brasserie By-Garden's 2000","type":"☕ Café / Bar","isBx":false,"commune":"Bruxelles-Ville","city":"Dilbeek","addr":"Alfons Gossetlaan 47, 1702 Dilbeek","comment":""},{"id":1771505559676,"name":"Chez Arthur","type":"☕ Café / Bar","isBx":true,"commune":"Auderghem","city":"Halle","addr":"Av. Daniel Boon 1, 1160 Auderghem","comment":""},{"id":1771505599529,"name":"French Riviera","type":"☕ Café / Bar","isBx":true,"commune":"Etterbeek","city":"Halle","addr":"Rue des Pervyse 80, 1040 Etterbeek ","comment":""},{"id":1771505646319,"name":"Le Traminot","type":"☕ Café / Bar","isBx":true,"commune":"Woluwe-Saint-Lambert","city":"Halle","addr":"Rue Martin V – 1200 Woluwe-St-Lambert","comment":"Proche gare Alma."},{"id":1771505689257,"name":"Ibis","type":"🏨 Hôtel","isBx":true,"commune":"Anderlecht","city":"Halle","addr":"Route de Lennik 790, 1070 Anderlecht ","comment":"Gare Erasme."},{"id":1771505737951,"name":"Pillows","type":"🏨 Hôtel","isBx":true,"commune":"Bruxelles-Ville","city":"Halle","addr":"Rue des Parroissiens 1, 1000 Bruxelles ","comment":"Gare Centrale."}];
-
-        let database = JSON.parse(localStorage.getItem('monCarnetFinal')) || initialData;
+        let database = JSON.parse(localStorage.getItem('monCarnetFinal')) || [];
         let styles = JSON.parse(localStorage.getItem('monStyleFinal')) || { primary: '#800080', bgImg: '' };
         let currentLang = localStorage.getItem('monLangFinal') || 'fr';
 
@@ -206,6 +205,13 @@
             document.getElementById('submitBtn').innerText = isEdit ? l.updateBtn : l.saveBtn;
         }
 
+        // --- LA FONCTION MAGIQUE POUR MAPS ---
+        function ouvrirMaps(nom, adresse, ville) {
+            const query = encodeURIComponent(nom + " " + adresse + " " + ville);
+            const url = "https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C72cd238e0fd14c91ee8808de6fbb4ba4%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071047373574196%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=rw7pUHR11mBJD7dl250y18OuBRo7VCtVDIwUqvBVwHo%3D&reserved=0" + query;
+            window.open(url, '_blank');
+        }
+
         function rechercher() {
             const zone = document.getElementById('searchZone').value;
             const nameF = document.getElementById('searchName').value.trim().toLowerCase();
@@ -226,10 +232,6 @@
             }).forEach(l => {
                 const v = l.isBx ? (currentLang === 'nl' ? communesNL[l.commune] : l.commune) : l.city;
                
-                // --- CONSTRUCTION DU LIEN MAPS ULTRA-FIABLE ---
-                const searchTxt = l.name + ", " + l.addr + ", " + v;
-                const mapUrl = "https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7Cc8c9ea2c809b41100ddc08de6fbaac0d%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071044707745143%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=4RkGjY2vMCGfDjCJANs3tuS9FeXe2FRU%2BilygrwsVzE%3D&reserved=0" + encodeURIComponent(searchTxt);
-               
                 area.innerHTML += `
                     <div class="result-item">
                         <div class="action-btns">
@@ -240,7 +242,9 @@
                         <h3>${l.name}</h3>
                         <p>📍 ${l.addr}, ${v}</p>
                         ${l.comment ? `<span class="comment-text">💬 ${l.comment}</span>` : ""}
-                        <a href="${mapUrl}" target="_blank" class="map-link">${dict[currentLang].mapLink}</a>
+                        <div class="map-link" onclick="ouvrirMaps('${l.name.replace(/'/g, "\\'")}', '${l.addr.replace(/'/g, "\\'")}', '${v}')">
+                            ${dict[currentLang].mapLink}
+                        </div>
                     </div>`;
             });
         }
@@ -253,9 +257,8 @@
             if (editId) {
                 const idx = database.findIndex(l => l.id === parseInt(editId));
                 database[idx] = data;
-                alert(dict[currentLang].alertUpd);
             }
-            else { database.push(data); alert(dict[currentLang].alertAdd); }
+            else { database.push(data); }
             localStorage.setItem('monCarnetFinal', JSON.stringify(database));
             resetForm(); rechercher();
         }
@@ -297,7 +300,6 @@
                         database = data;
                         localStorage.setItem('monCarnetFinal', JSON.stringify(database));
                         rechercher();
-                        alert(dict[currentLang].alertImp);
                     }
                 } catch (err) { alert("Erreur."); }
             };
