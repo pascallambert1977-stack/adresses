@@ -341,10 +341,24 @@
         function supprimer(id) { if(confirm(t('confirmDel'))) { database = database.filter(l => l.id !== id); localStorage.setItem('monCarnetV14', JSON.stringify(database)); rechercher(); } }
         function exporterDonnees() { const blob = new Blob([JSON.stringify(database)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "lieu_de_contact.json"; a.click(); }
         function importerDonnees(event) {
-            const reader = new FileReader();
-            reader.onload = function(e) { database = database.concat(JSON.parse(e.target.result)); localStorage.setItem('monCarnetV14', JSON.stringify(database)); rechercher(); alert(t('alertImp')); };
-            reader.readAsText(event.target.files[0]);
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            // On fusionne les nouvelles données avec les anciennes
+            database = database.concat(importedData);
+           
+            // On sauvegarde dans la TOUTE DERNIÈRE version (V14)
+            localStorage.setItem('monCarnetV14', JSON.stringify(database));
+           
+            rechercher();
+            alert(t('alertImp'));
+        } catch (err) {
+            alert("Erreur lors de la lecture du fichier. Vérifie que c'est bien un fichier JSON valide.");
         }
+    };
+    reader.readAsText(event.target.files[0]);
+}
         function toggleSettings() { const s = document.getElementById('settings'); s.style.display = (s.style.display === 'block') ? 'none' : 'block'; }
         function toggleFormAdd() {
             const isBx = document.getElementById('addIsBx').value === 'oui';
@@ -354,3 +368,4 @@
     </script>
 </body>
 </html>
+
