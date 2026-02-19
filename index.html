@@ -93,8 +93,8 @@
 
     <script>
         const communes = ["Anderlecht", "Auderghem", "Berchem-Sainte-Agathe", "Bruxelles-Ville", "Etterbeek", "Evere", "Forest", "Ganshoren", "Ixelles", "Jette", "Koekelberg", "Molenbeek-Saint-Jean", "Saint-Gilles", "Saint-Josse-ten-Noode", "Schaerbeek", "Uccle", "Watermael-Boitsfort", "Woluwe-Saint-Lambert", "Woluwe-Saint-Pierre"];
-        let database = JSON.parse(localStorage.getItem('monCarnetV12')) || [];
-        let styles = JSON.parse(localStorage.getItem('monStyleV12')) || { primary: '#800080', bgImg: '' };
+        let database = JSON.parse(localStorage.getItem('monCarnetV13')) || [];
+        let styles = JSON.parse(localStorage.getItem('monStyleV13')) || { primary: '#800080', bgImg: '' };
 
         window.onload = function() {
             applySavedStyles();
@@ -109,14 +109,14 @@
             reader.onload = function(e) {
                 styles.bgImg = e.target.result;
                 document.documentElement.style.setProperty('--bg-image', `url('${styles.bgImg}')`);
-                localStorage.setItem('monStyleV12', JSON.stringify(styles));
+                localStorage.setItem('monStyleV13', JSON.stringify(styles));
             };
             reader.readAsDataURL(event.target.files[0]);
         }
 
         function updateStyle(type, value) {
             if (type === 'primary') { document.documentElement.style.setProperty('--primary', value); styles.primary = value; }
-            localStorage.setItem('monStyleV12', JSON.stringify(styles));
+            localStorage.setItem('monStyleV13', JSON.stringify(styles));
         }
 
         function applySavedStyles() {
@@ -147,7 +147,9 @@
                 return mN && mZ && mD;
             }).forEach(l => {
                 const v = l.isBx ? l.commune : l.city;
-                const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7Ccbcad2a957274218aff708de6f9bd087%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639070912157293379%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=GOLYrrLTEtoUtKGBfcks%2B0hO1naNZrcCziU%2FrATuaRM%3D&reserved=0{encodeURIComponent(l.name + ' ' + l.addr + ' ' + v)}`;
+                // Lien Google Maps corrigé !
+                const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7Cecb02944c89147732e1d08de6f9e1002%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639070921862598512%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=295MG3YwA6Z%2Bp1Ja8%2F3ELkvRPceukKpBksKQOdp5dAE%3D&reserved=0{encodeURIComponent(l.name + ' ' + l.addr + ' ' + v)}`;
+               
                 area.innerHTML += `
                     <div class="result-item">
                         <div class="action-btns">
@@ -186,7 +188,7 @@
                 alert("Ajouté avec succès !");
             }
            
-            localStorage.setItem('monCarnetV12', JSON.stringify(database));
+            localStorage.setItem('monCarnetV13', JSON.stringify(database));
             resetForm();
             rechercher();
         }
@@ -219,11 +221,11 @@
             document.getElementById('cancelEditBtn').style.display = "none";
         }
 
-        function supprimer(id) { if(confirm("Supprimer ce lieu ?")) { database = database.filter(l => l.id !== id); localStorage.setItem('monCarnetV12', JSON.stringify(database)); rechercher(); } }
-        function exporterDonnees() { const blob = new Blob([JSON.stringify(database)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "mon_carnet.json"; a.click(); }
+        function supprimer(id) { if(confirm("Supprimer ce lieu ?")) { database = database.filter(l => l.id !== id); localStorage.setItem('monCarnetV13', JSON.stringify(database)); rechercher(); } }
+        function exporterDonnees() { const blob = new Blob([JSON.stringify(database)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "lieu_de_contact.json"; a.click(); }
         function importerDonnees(event) {
             const reader = new FileReader();
-            reader.onload = function(e) { database = database.concat(JSON.parse(e.target.result)); localStorage.setItem('monCarnetV12', JSON.stringify(database)); rechercher(); alert("Importation finie !"); };
+            reader.onload = function(e) { database = database.concat(JSON.parse(e.target.result)); localStorage.setItem('monCarnetV13', JSON.stringify(database)); rechercher(); alert("Importation finie !"); };
             reader.readAsText(event.target.files[0]);
         }
         function toggleSettings() { const s = document.getElementById('settings'); s.style.display = (s.style.display === 'block') ? 'none' : 'block'; }
@@ -235,4 +237,3 @@
     </script>
 </body>
 </html>
-
