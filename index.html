@@ -238,10 +238,8 @@
        
         // --- LE LIEN CORRIGÉ SANS TEXTE PARASITE ---
         const query = encodeURIComponent(`${l.name}, ${l.addr}, ${v}`);
-        const query = encodeURIComponent(`${l.name}, ${l.addr}, ${v}`);
-        const query = encodeURIComponent(`${l.name}, ${l.addr}, ${v}`);
-const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7Cdecc686b60c2402b78d208de6fad6381%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639070987631603809%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=oob2HiDFPmVObOQ4utZdgchOVyJFikqF0nemZTqNzLo%3D&reserved=0{query}`;
-       
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+        
         let badgeText = l.type;
         if(l.type.includes("Hôtel") || l.type.includes("Hotel")) badgeText = dict[currentLang].optHotel;
         else if(l.type.includes("Restaurant")) badgeText = dict[currentLang].optResto;
@@ -331,6 +329,7 @@ const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%
     </script>
 </body>
 </html>
+
 
 
 
