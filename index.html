@@ -236,10 +236,8 @@
     }).forEach(l => {
         const v = l.isBx ? (currentLang === 'nl' ? communesNL[l.commune] : l.commune) : l.city;
        
-        // --- LA CORRECTION EST ICI ---
-        // Utilisation du format d'URL universel de Google Maps
-        const queryEncoded = encodeURIComponent(l.name + " " + l.addr + " " + v);
-        const mapUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C966eef62f8de428a88a808de6fabc1b8%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639070980658716053%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=v12tYOBo42LH2V8TuwyojyDlarzG49fMjxWr1HTq4nA%3D&reserved=0{queryEncoded}`;
+        // --- LE LIEN CORRIGÉ SANS TEXTE PARASITE ---
+        const mapUrl = "https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C5d171030e92d400decde08de6facadc4%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639070984587748580%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=WBtlknQ%2FZ7m6HdPk4ZlW8it%2Bh6WbJ8nT7UO%2B6FWpZ18%3D&reserved=0" + encodeURIComponent(l.name + " " + l.addr + " " + v);
        
         let badgeText = l.type;
         if(l.type.includes("Hôtel") || l.type.includes("Hotel")) badgeText = dict[currentLang].optHotel;
@@ -330,4 +328,5 @@
     </script>
 </body>
 </html>
+
 
