@@ -3,48 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lieu de contact - V18 Corrigée</title>
+    <title>Mon Carnet de Lieux</title>
     <style>
-        :root { --primary: #800080; --bg: #fdfafc; --accent: #FFD700; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #333; }
+        :root { --primary: #800080; --accent: #FFD700; }
+        body { font-family: 'Segoe UI', sans-serif; background: #fdfafc; margin: 0; padding: 15px; color: #333; }
         .container { max-width: 600px; margin: 0 auto; }
         h1 { color: var(--primary); text-align: center; font-variant: small-caps; }
        
-        /* Boutons Langue et Réglages */
-        .top-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px; }
-        .btn-top { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85em; }
+        /* Boutons Langue */
+        .top-bar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        .btn-lang { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 12px; border-radius: 8px; cursor: pointer; }
        
         /* Cartes */
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .result-item { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; border-left: 8px solid var(--primary); position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
        
         /* Actions Modifier/Supprimer */
-        .actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; }
-        .btn-edit { color: #007bff; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.8em; font-weight: bold; }
-        .btn-del { color: #dc3545; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.8em; }
+        .actions { position: absolute; top: 12px; right: 12px; }
+        .btn-edit { color: #007bff; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.85em; font-weight: bold; }
+        .btn-del { color: #dc3545; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 0.85em; margin-left: 10px; }
        
         /* Bouton Maps */
-        .btn-maps { display: block; background: var(--primary); color: white; text-align: center; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 15px; font-size: 0.9em; transition: 0.2s; }
-        .btn-maps:active { transform: scale(0.98); background: #600060; }
+        .btn-maps { display: block; background: var(--primary); color: white; text-align: center; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: bold; margin-top: 15px; }
        
         /* Formulaire */
-        label { display: block; margin-top: 12px; font-weight: bold; font-size: 0.85em; color: #555; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        .btn-save { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 1em; }
-        .note { font-style: italic; color: #666; font-size: 0.9em; margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px; }
+        label { display: block; margin-top: 12px; font-weight: bold; font-size: 0.85em; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .note { font-style: italic; color: #666; font-size: 0.9em; margin-top: 8px; border-top: 1px solid #eee; padding-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="top-bar">
-        <button class="btn-top" onclick="switchLang()" id="langBtn">🇳🇱 NL</button>
+        <button class="btn-lang" onclick="switchLang()" id="langBtn">🇳🇱 NL</button>
     </div>
    
     <h1 id="appTitle">🔮 Lieu de contact</h1>
 
     <div class="card">
-        <input type="text" id="searchInput" placeholder="Rechercher par nom..." onkeyup="refresh()">
+        <input type="text" id="searchInput" placeholder="Rechercher..." onkeyup="refresh()">
         <select id="searchZone" onchange="refresh()" style="margin-top:10px;">
             <option value="tous" id="optAll">🌍 Toutes les zones</option>
             <option value="bx">🇧🇪 Bruxelles</option>
@@ -59,24 +58,17 @@
         <input type="hidden" id="editId">
        
         <label>Nom :</label><input type="text" id="f-name">
-       
         <label>Zone :</label>
         <select id="f-isbx" onchange="toggleZone()">
             <option value="oui">Bruxelles</option>
             <option value="non">Hors Bruxelles</option>
         </select>
 
-        <div id="box-bx">
-            <label>Commune :</label>
-            <select id="f-commune"></select>
-        </div>
-        <div id="box-hors" style="display:none">
-            <label>Ville :</label>
-            <input type="text" id="f-city">
-        </div>
+        <div id="box-bx"><label>Commune :</label><select id="f-commune"></select></div>
+        <div id="box-hors" style="display:none"><label>Ville :</label><input type="text" id="f-city"></div>
 
         <label>Adresse :</label><input type="text" id="f-addr">
-        <label>Note / Commentaire :</label><textarea id="f-note" rows="2"></textarea>
+        <label>Note :</label><textarea id="f-note" rows="2"></textarea>
        
         <button class="btn-save" id="btnSubmit" onclick="save()">Enregistrer</button>
         <button id="btnCancel" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Annuler la modification</button>
@@ -85,14 +77,13 @@
 
 <script>
     const communes = ["Anderlecht","Auderghem","Berchem-Sainte-Agathe","Bruxelles-Ville","Etterbeek","Evere","Forest","Ganshoren","Ixelles","Jette","Koekelberg","Molenbeek-Saint-Jean","Saint-Gilles","Saint-Josse-ten-Noode","Schaerbeek","Uccle","Watermael-Boitsfort","Woluwe-Saint-Lambert","Woluwe-Saint-Pierre"];
-   
     const tr = {
-        fr: { app: "🔮 Lieu de contact", all: "🌍 Toutes les zones", add: "➕ Ajouter", edit: "📝 Modifier", maps: "🗺️ Ouvrir l'itinéraire", save: "Enregistrer", update: "Mettre à jour" },
+        fr: { app: "🔮 Lieu de contact", all: "🌍 Toutes les zones", add: "➕ Ajouter", edit: "📝 Modifier", maps: "🗺️ Voir l'itinéraire", save: "Enregistrer", update: "Mettre à jour" },
         nl: { app: "🔮 Contactplaats", all: "🌍 Alle zones", add: "➕ Toevoegen", edit: "📝 Bewerken", maps: "🗺️ Route plannen", save: "Opslaan", update: "Bijwerken" }
     };
 
-    let lang = localStorage.getItem('lang_v18_pref') || 'fr';
-    let database = JSON.parse(localStorage.getItem('data_v18_pref')) || [];
+    let lang = localStorage.getItem('lang_pref') || 'fr';
+    let database = JSON.parse(localStorage.getItem('data_pref')) || [];
 
     function init() {
         const sel = document.getElementById('f-commune');
@@ -103,7 +94,7 @@
 
     function switchLang() {
         lang = lang === 'fr' ? 'nl' : 'fr';
-        localStorage.setItem('lang_v18_pref', lang);
+        localStorage.setItem('lang_pref', lang);
         applyLang();
         refresh();
     }
@@ -135,20 +126,20 @@
             return mName && mZone;
         }).forEach(i => {
             const lieu = i.isBx ? i.commune : i.city;
-            // --- URL GOOGLE MAPS CORRIGÉE (syntaxe ${}) ---
-            const query = encodeURIComponent(`${i.name} ${i.addr} ${lieu}`);
-            const mapsUrl = `https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%24&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C42f398fbaacf46048bff08de6fc2f704%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071080303074810%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=Spe8Q7NaQ6O7OfiyLfgnuHbft37LQ2QeeM80L9nLaAE%3D&reserved=0{query}`;
+            // --- LIEN MAPS ULTRA-ROBUSTE ---
+            const texteRecherche = encodeURIComponent(i.name + " " + i.addr + " " + lieu);
+            const mapsUrl = "https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D&data=05%7C02%7CPascal.Lambert%40police.belgium.eu%7C139ab23ad8244eeaf32f08de6fc397bc%7Cf7e06a0857c2479ebfa5e63a6dd83518%7C0%7C0%7C639071083013251830%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=cUsrVKT%2BRNLkPL3GyH8a6C89U0goRKgX1YZ0bSVqQwo%3D&reserved=0" + texteRecherche;
 
             list.innerHTML += `
                 <div class="result-item">
                     <div class="actions">
-                        <button class="btn-edit" onclick="loadEdit(${i.id})">${tr[lang].edit}</button>
-                        <button class="btn-del" onclick="del(${i.id})">X</button>
+                        <button class="btn-edit" onclick="loadEdit(` + i.id + `)">` + tr[lang].edit + `</button>
+                        <button class="btn-del" onclick="del(` + i.id + `)">X</button>
                     </div>
-                    <h3 style="margin: 0 0 5px 0;">${i.name}</h3>
-                    <p style="margin: 0; font-size: 0.95em;">📍 ${i.addr}, ${lieu}</p>
-                    ${i.note ? `<p class="note">💬 ${i.note}</p>` : ''}
-                    <a href="${mapsUrl}" target="_blank" class="btn-maps">${tr[lang].maps}</a>
+                    <h3 style="margin: 0 0 5px 0;">` + i.name + `</h3>
+                    <p style="margin: 0; font-size: 0.9em;">📍 ` + i.addr + `, ` + lieu + `</p>
+                    ` + (i.note ? `<p class="note">💬 ` + i.note + `</p>` : '') + `
+                    <a href="` + mapsUrl + `" target="_blank" class="btn-maps">` + tr[lang].maps + `</a>
                 </div>`;
         });
     }
@@ -157,7 +148,7 @@
         const id = document.getElementById('editId').value;
         const name = document.getElementById('f-name').value;
         const addr = document.getElementById('f-addr').value;
-        if(!name || !addr) return alert("Le nom et l'adresse sont obligatoires !");
+        if(!name || !addr) return alert("Nom et Adresse obligatoires");
 
         const obj = {
             id: id ? parseInt(id) : Date.now(),
@@ -176,7 +167,7 @@
             database.push(obj);
         }
 
-        localStorage.setItem('data_v18_pref', JSON.stringify(database));
+        localStorage.setItem('data_pref', JSON.stringify(database));
         resetForm();
         refresh();
     }
@@ -209,15 +200,14 @@
     }
 
     function del(id) {
-        if(confirm("Supprimer définitivement ce lieu ?")) {
+        if(confirm("Supprimer ce lieu ?")) {
             database = database.filter(x => x.id !== id);
-            localStorage.setItem('data_v18_pref', JSON.stringify(database));
+            localStorage.setItem('data_pref', JSON.stringify(database));
             refresh();
         }
     }
 
     init();
 </script>
-
 </body>
 </html>
