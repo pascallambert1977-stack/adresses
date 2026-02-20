@@ -721,7 +721,7 @@
             </h3>
             <p>📍 ${i.addr}, ${lieu}</p>
             ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-maps" title="${tr[lang].maps}">
+            <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-maps">
               ${tr[lang].maps}
             </a>
           </div>`;
@@ -803,7 +803,13 @@
 
     function del(id) {
       if (confirm(lang === 'fr' ? "Supprimer ?" : "Verwijderen?")) {
-        database = database.filter(x => x.id start
+        database = database.filter(x => x.id !== id);
+        saveStorage(LS_KEYS.data, database);
+        refresh();
+      }
+    }
+
+    // start
     init();
   </script>
 </body>
