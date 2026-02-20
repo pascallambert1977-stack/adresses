@@ -988,7 +988,7 @@
             </h3>
             <p>📍 ${i.addr}, ${lieu}</p>
             ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            ${url}
+            <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-maps">
               ${tr[lang].maps}
             </a>
           </div>`;
@@ -1085,7 +1085,7 @@
       document.getElementById('f-addr').value = "";
       document.getElementById('f-comment').value = "";
       document.getElementById('f-type').value = 'autre';
-      // Zone : on ne force pas le select, mais on assure l'affichage cohérent
+      // Zone : ne change pas la valeur du select, mais rafraîchit l’affichage
       toggleZone();
       document.getElementById('formTitle').innerText = tr[lang].add;
       document.getElementById('btnSubmit').innerText = tr[lang].save;
