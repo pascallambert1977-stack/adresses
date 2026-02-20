@@ -83,10 +83,20 @@
           <div class="btn-row">
             <button class="btn" onclick="triggerImport('merge')" id="btnImportMerge">Importer (ajouter)</button>
             <button class="btn" onclick="triggerImport('replace')" id="btnImportReplace">Importer (remplacer)</button>
-            <button class="btn" onclick="exportData()" id="btnExport">Exporter JSON</button>
+            <button class="btn" onclick="exportData()" id="btnExport">Exporter JSON (données + présentation)</button>
             <button class="btn danger" onclick="clearData()" id="btnClear">Vider la base</button>
           </div>
           <input type="file" id="fileInput" accept="application/json" style="display:none" />
+        </div>
+
+        <!-- Présentation seule -->
+        <div class="row">
+          <strong id="presentationTitle">Présentation (thème)</strong>
+          <div class="btn-row">
+            <button class="btn" onclick="exportTheme()" id="btnExportTheme">Exporter présentation</button>
+            <button class="btn" onclick="triggerImportTheme()" id="btnImportTheme">Importer présentation</button>
+          </div>
+          <input type="file" id="fileInputTheme" accept="application/json" style="display:none" />
         </div>
 
         <!-- Thème -->
@@ -183,9 +193,7 @@
 
     // Clés de type stables (indépendantes de la langue)
     const TYPE_KEYS = ['cafe','hotel','restaurant','culture','autre'];
-    const TYPE_EMOJI = {
-      cafe: '☕', hotel: '🏨', restaurant: '🍽️', culture: '🎭', autre: '🏷️'
-    };
+    const TYPE_EMOJI = { cafe: '☕', hotel: '🏨', restaurant: '🍽️', culture: '🎭', autre: '🏷️' };
 
     const tr = {
       fr: {
@@ -203,8 +211,11 @@
         importExport: "Import / Export",
         importMerge: "Importer (ajouter)",
         importReplace: "Importer (remplacer)",
-        export: "Exporter JSON",
+        export: "Exporter JSON (données + présentation)",
         clear: "Vider la base",
+        presentation: "Présentation (thème)",
+        exportTheme: "Exporter présentation",
+        importTheme: "Importer présentation",
         theme: "Thème",
         primaryColor: "Couleur principale",
         bgColor: "Couleur de fond",
@@ -220,13 +231,7 @@
         typeLabel: "Type d’établissement",
         commentLabel: "Commentaire (une ligne)",
         // Types (affichage)
-        types: {
-          cafe: "Café",
-          hotel: "Hôtel",
-          restaurant: "Restaurant",
-          culture: "Culture",
-          autre: "Autre"
-        }
+        types: { cafe: "Café", hotel: "Hôtel", restaurant: "Restaurant", culture: "Culture", autre: "Autre" }
       },
       nl: {
         app: "🔮 Contactplaats",
@@ -243,8 +248,11 @@
         importExport: "Import / Export",
         importMerge: "Importeren (toevoegen)",
         importReplace: "Importeren (vervangen)",
-        export: "JSON exporteren",
+        export: "JSON exporteren (data + presentatie)",
         clear: "Basis wissen",
+        presentation: "Presentatie (thema)",
+        exportTheme: "Presentatie exporteren",
+        importTheme: "Presentatie importeren",
         theme: "Thema",
         primaryColor: "Primaire kleur",
         bgColor: "Achtergrondkleur",
@@ -260,13 +268,7 @@
         typeLabel: "Type zaak",
         commentLabel: "Opmerking (één regel)",
         // Types (affichage)
-        types: {
-          cafe: "Café",
-          hotel: "Hotel",
-          restaurant: "Restaurant",
-          culture: "Cultuur",
-          autre: "Anders"
-        }
+        types: { cafe: "Café", hotel: "Hotel", restaurant: "Restaurant", culture: "Cultuur", autre: "Anders" }
       }
     };
 
@@ -376,7 +378,6 @@
         const opt = new Option(`${emojiForType(k)} ${labels[k]}`, k);
         sel.add(opt);
       });
-      // valeur par défaut
       if (!sel.value) sel.value = 'autre';
     }
 
@@ -396,6 +397,10 @@
       document.getElementById('btnImportReplace').innerText = l.importReplace;
       document.getElementById('btnExport').innerText = l.export;
       document.getElementById('btnClear').innerText = l.clear;
+
+      document.getElementById('presentationTitle').innerText = l.presentation;
+      document.getElementById('btnExportTheme').innerText = l.exportTheme;
+      document.getElementById('btnImportTheme').innerText = l.importTheme;
 
       document.getElementById('themeTitle').innerText = l.theme;
       document.getElementById('labelPrimary').innerText = l.primaryColor;
@@ -507,10 +512,15 @@
     }
 
     // ----------------------
-    // Import / Export
+    // Export / Import — Données + Présentation
     // ----------------------
     function exportData() {
-      const payload = { version: 2, items: database };
+      // On exporte TOUT (rétro‑compatible avec anciennes imports)
+      const payload = {
+        version: 3,
+        theme: { primary: themePrimary, bg: themeBg, bgImg: themeBgImg },
+        items: database
+      };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -535,37 +545,89 @@
       reader.onload = () => {
         try {
           const parsed = JSON.parse(reader.result);
-          const items = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.items) ? parsed.items : []);
-          if (!Array.isArray(items)) throw new Error("Format JSON invalide");
+          // 1) Appliquer thème si présent (optionnel)
+          const theme = parsed.theme || null;
+          if (theme && (theme.primary || theme.bg || typeof theme.bgImg !== 'undefined')) {
+            applyTheme(theme.primary || themePrimary, theme.bg || themeBg, typeof theme.bgImg === 'string' ? theme.bgImg : themeBgImg);
+          }
 
-          if (mode === 'replace') database = [];
+          // 2) Récupérer items si présents (rétro‑compatible)
+          const items = Array.isArray(parsed)
+            ? parsed
+            : (Array.isArray(parsed.items) ? parsed.items : []);
 
-          // merge + migration (note -> comment, type par défaut)
-          items.forEach(obj => {
-            if (!obj || !obj.name || !obj.addr) return;
-            const keyNew = `${normalizeLower(obj.name)}|${normalizeLower(obj.addr)}|${normalizeLower(obj.isBx ? obj.commune : obj.city)}`;
-            const idx = database.findIndex(x =>
-              `${normalizeLower(x.name)}|${normalizeLower(x.addr)}|${normalizeLower(x.isBx ? x.commune : x.city)}` === keyNew
-            );
-            const safe = {
-              id: obj.id ? parseInt(obj.id) : Date.now() + Math.floor(Math.random()*1000),
-              name: String(obj.name),
-              isBx: !!obj.isBx,
-              commune: obj.commune || '',
-              city: obj.city || '',
-              addr: String(obj.addr),
-              comment: (typeof obj.comment === 'string') ? obj.comment : (obj.note || ''), // migration
-              type: TYPE_KEYS.includes(obj.type) ? obj.type : 'autre'
-            };
-            if (idx !== -1) { database[idx] = safe; } else { database.push(safe); }
-          });
+          if (items.length) {
+            if (mode === 'replace') database = [];
+            // merge + migration (note -> comment, type par défaut)
+            items.forEach(obj => {
+              if (!obj || !obj.name || !obj.addr) return;
+              const keyNew = `${normalizeLower(obj.name)}|${normalizeLower(obj.addr)}|${normalizeLower(obj.isBx ? obj.commune : obj.city)}`;
+              const idx = database.findIndex(x =>
+                `${normalizeLower(x.name)}|${normalizeLower(x.addr)}|${normalizeLower(x.isBx ? x.commune : x.city)}` === keyNew
+              );
+              const safe = {
+                id: obj.id ? parseInt(obj.id) : Date.now() + Math.floor(Math.random()*1000),
+                name: String(obj.name),
+                isBx: !!obj.isBx,
+                commune: obj.commune || '',
+                city: obj.city || '',
+                addr: String(obj.addr),
+                comment: (typeof obj.comment === 'string') ? obj.comment : (obj.note || ''), // migration
+                type: TYPE_KEYS.includes(obj.type) ? obj.type : 'autre'
+              };
+              if (idx !== -1) { database[idx] = safe; } else { database.push(safe); }
+            });
+            saveStorage(LS_KEYS.data, database);
+          }
 
-          saveStorage(LS_KEYS.data, database);
           refresh();
           alert(lang === 'fr' ? 'Import terminé.' : 'Import voltooid.');
         } catch (e) {
           console.error(e);
           alert((lang === 'fr' ? 'Erreur d’import : ' : 'Importfout: ') + e.message);
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    // ----------------------
+    // Export / Import — Présentation seule
+    // ----------------------
+    function exportTheme() {
+      const payload = {
+        version: 1,
+        theme: { primary: themePrimary, bg: themeBg, bgImg: themeBgImg }
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const date = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = `presentation_theme_${date}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function triggerImportTheme() {
+      const inp = document.getElementById('fileInputTheme');
+      inp.value = "";
+      inp.onchange = () => doImportTheme(inp.files[0]);
+      inp.click();
+    }
+
+    function doImportTheme(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const theme = parsed.theme || parsed; // accepte {theme:{...}} ou {...}
+          if (!theme || (typeof theme !== 'object')) throw new Error('Fichier thème invalide');
+          applyTheme(theme.primary || themePrimary, theme.bg || themeBg, typeof theme.bgImg === 'string' ? theme.bgImg : themeBgImg);
+          alert(lang === 'fr' ? 'Présentation importée.' : 'Presentatie geïmporteerd.');
+        } catch (e) {
+          console.error(e);
+          alert((lang === 'fr' ? 'Erreur d’import de présentation : ' : 'Fout bij import van presentatie: ') + e.message);
         }
       };
       reader.readAsText(file, 'utf-8');
@@ -612,7 +674,6 @@
 
       filtered.forEach(i => {
         const lieu = i.isBx ? i.commune : i.city;
-        // Migration à l'affichage si anciens enregistrements
         const comment = (typeof i.comment === 'string') ? i.comment : (i.note || '');
         const typeKey = TYPE_KEYS.includes(i.type) ? i.type : 'autre';
         const typeLabel = tr[lang].types[typeKey];
@@ -632,7 +693,9 @@
             </h3>
             <p>📍 ${i.addr}, ${lieu}</p>
             ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            ${mapsUrl}${tr[lang].maps}</a>
+            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-maps">
+              ${tr[lang].maps}
+            </a>
           </div>`;
       });
     }
