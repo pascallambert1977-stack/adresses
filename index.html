@@ -113,7 +113,7 @@
           <input type="file" id="bgImage" accept="image/*" />
           <div class="preview" id="bgPreview"></div>
 
-          <!-- Nouvelle option : conserver l'image actuelle -->
+          <!-- Option : conserver l'image actuelle lors d'un import/appli thème -->
           <label class="note" style="display:flex; align-items:center; gap:8px;">
             <input type="checkbox" id="chkPreserveBg" />
             <span id="txtPreserveBg">Conserver l’image actuelle lors de l’application d’un thème/import</span>
@@ -128,6 +128,15 @@
             ⚠️ Les grandes images peuvent remplir rapidement le stockage local (~5 Mo de limite).
           </div>
         </div>
+
+        <!-- Sauvegarde auto -->
+        <div class="row">
+          <strong id="autoBackupTitle">Sauvegarde auto</strong>
+          <div class="note"><span id="lastBackupLabel">Dernière auto‑sauvegarde :</span> <span id="lastBackupInfo">—</span></div>
+          <div class="btn-row">
+            <button class="btn" onclick="restoreFromBackup()" id="btnRestoreBackup">Restaurer la dernière auto‑sauvegarde</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -135,7 +144,7 @@
     <div class="card">
       <h3 id="searchTitle">🔍 Rechercher</h3>
       <input type="text" id="searchInput" placeholder="Nom..." onkeyup="onSearchChange()" autocomplete="off" aria-label="Rechercher par nom">
-      <select id="searchZone" onchange="onSearchChange(); updateCommuneFilterVisibility()" style="margin-top:10px;" aria-label="Filtrer par zone">
+      <select id="searchZone" onchange="onSearchChange(); updateCommuneFilterVisibility(); updateCityFilterVisibility()" style="margin-top:10px;" aria-label="Filtrer par zone">
         <option value="tous" id="optAll">🌍 Toutes les zones</option>
         <option value="bx">🇧🇪 Bruxelles</option>
         <option value="hors">🚗 Hors Bruxelles</option>
@@ -146,6 +155,14 @@
         <label for="searchCommune" id="labelSearchCommune">Commune</label>
         <select id="searchCommune" onchange="onSearchChange()" aria-label="Filtrer par commune">
           <option value="all" id="optAllComm">Toutes les communes</option>
+        </select>
+      </div>
+
+      <!-- Filtre Ville (visible seulement quand Zone=Hors Bruxelles) -->
+      <div id="filter-city" class="row" style="display:none; margin-top:10px;">
+        <label for="searchCity" id="labelSearchCity">Ville</label>
+        <select id="searchCity" onchange="onSearchChange()" aria-label="Filtrer par ville">
+          <option value="all" id="optAllCity">Toutes les villes</option>
         </select>
       </div>
 
@@ -231,9 +248,18 @@
         applyTheme: "Appliquer le thème",
         preserveBg: "Conserver l’image actuelle lors de l’application d’un thème/import",
         storageNote: "⚠️ Les grandes images peuvent remplir rapidement le stockage local (~5 Mo de limite).",
+        // Auto-backup
+        autoBackupTitle: "Sauvegarde auto",
+        lastBackupLabel: "Dernière auto‑sauvegarde :",
+        noBackup: "Aucune",
+        restoreBackup: "Restaurer la dernière auto‑sauvegarde",
+        restoreConfirm: "Remplacer les données actuelles par la dernière auto‑sauvegarde ?",
+        restoredOk: "Restauration terminée.",
         // Filtres
         communeLabel: "Commune",
         allCommunes: "Toutes les communes",
+        cityLabel: "Ville",
+        allCities: "Toutes les villes",
         // Form
         typeLabel: "Type d’établissement",
         commentLabel: "Commentaire (une ligne)",
@@ -269,9 +295,18 @@
         applyTheme: "Thema toepassen",
         preserveBg: "Huidige achtergrondafbeelding behouden bij toepassen/importeren van thema",
         storageNote: "⚠️ Grote afbeeldingen kunnen de lokale opslag snel vullen (~5 MB-limiet).",
+        // Auto-backup
+        autoBackupTitle: "Automatische back-up",
+        lastBackupLabel: "Laatste automatische backup:",
+        noBackup: "Geen",
+        restoreBackup: "Laatste automatische backup herstellen",
+        restoreConfirm: "Huidige gegevens vervangen door de laatste automatische backup?",
+        restoredOk: "Herstel voltooid.",
         // Filtres
         communeLabel: "Gemeente",
         allCommunes: "Alle gemeenten",
+        cityLabel: "Stad",
+        allCities: "Alle steden",
         // Form
         typeLabel: "Type zaak",
         commentLabel: "Opmerking (één regel)",
@@ -289,10 +324,12 @@
       q: 'search_q_v18',
       zone: 'search_zone_v18',
       commune: 'search_commune_v18',
+      city: 'search_city_v18',
       themePrimary: 'theme_primary_v18',
       themeBg: 'theme_bg_v18',
       themeBgImg: 'theme_bgimg_v18',
-      preserveBg: 'theme_preserve_bgimg_v18'
+      preserveBg: 'theme_preserve_bgimg_v18',
+      backup: 'data_backup_v18'
     };
 
     function loadStorage(key, fallback) {
@@ -301,7 +338,7 @@
     }
     function saveStorage(key, value) {
       try { localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value)); }
-      catch(e){ console.warn('Écriture stockage échouée:', e); alert("Le stockage local est plein ou indisponible."); }
+      catch(e){ console.warn('Écriture stockage échouée:', e); /* silencieux pour beforeunload */ }
     }
     function normalizeLower(s) {
       return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -316,6 +353,12 @@
       return `https://www.google.com/maps/search/?${params.toString()}`;
     }
 
+    function formatDateTime(iso) {
+      if (!iso) return '';
+      try { return new Date(iso).toLocaleString(lang === 'nl' ? 'nl-BE' : 'fr-BE'); }
+      catch { return iso; }
+    }
+
     // ----------------------
     // État
     // ----------------------
@@ -324,6 +367,7 @@
     let searchQ = localStorage.getItem(LS_KEYS.q) || '';
     let searchZone = localStorage.getItem(LS_KEYS.zone) || 'tous';
     let searchCommune = localStorage.getItem(LS_KEYS.commune) || 'all';
+    let searchCity = localStorage.getItem(LS_KEYS.city) || 'all';
     let importMode = 'merge';
 
     // Thème (valeurs par défaut si non sauvegardées)
@@ -340,9 +384,9 @@
       const selForm = document.getElementById('f-commune');
       communes.forEach(c => selForm.add(new Option(c, c)));
 
-      // Filtre communes (recherche)
-      const selFilter = document.getElementById('searchCommune');
-      communes.forEach(c => selFilter.add(new Option(c, c)));
+      // Filtres (Commune & Ville)
+      const selFilterComm = document.getElementById('searchCommune');
+      communes.forEach(c => selFilterComm.add(new Option(c, c)));
 
       // Type options
       populateTypeOptions();
@@ -350,7 +394,7 @@
       // initialise recherche (persistée)
       document.getElementById('searchInput').value = searchQ;
       document.getElementById('searchZone').value = searchZone;
-      selFilter.value = searchCommune;
+      selFilterComm.value = searchCommune;
 
       // Applique thème (sur calque)
       applyTheme(themePrimary, themeBg, themeBgImg, false);
@@ -370,7 +414,19 @@
       toggleZone();
       applyLang();
       updateCommuneFilterVisibility();
+      rebuildCityFilterOptions(true); // construit la liste des villes
+      updateCityFilterVisibility();
+      updateBackupInfo();
+
+      // Rendu initial
       refresh();
+
+      // Sauvegarde auto à la fermeture / masquage
+      window.addEventListener('beforeunload', () => autoBackup('beforeunload'));
+      window.addEventListener('pagehide', () => autoBackup('pagehide'));
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') autoBackup('visibilitychange');
+      });
 
       document.getElementById('bgImage').addEventListener('change', onBgImageSelected);
     }
@@ -380,6 +436,7 @@
       localStorage.setItem(LS_KEYS.lang, lang);
       applyLang();
       populateTypeOptions(); // recharger libellés
+      updateBackupInfo();
       refresh();
     }
 
@@ -432,9 +489,16 @@
       document.getElementById('storageNote').innerText = l.storageNote;
       document.getElementById('txtPreserveBg').innerText = l.preserveBg;
 
+      // Auto-backup
+      document.getElementById('autoBackupTitle').innerText = l.autoBackupTitle;
+      document.getElementById('lastBackupLabel').innerText = l.lastBackupLabel;
+      document.getElementById('btnRestoreBackup').innerText = l.restoreBackup;
+
       // Filtres
       document.getElementById('labelSearchCommune').innerText = l.communeLabel;
       document.getElementById('optAllComm').innerText = l.allCommunes;
+      document.getElementById('labelSearchCity').innerText = l.cityLabel;
+      document.getElementById('optAllCity').innerText = l.allCities;
 
       // Form
       document.getElementById('labelType').innerText = l.typeLabel;
@@ -452,17 +516,32 @@
     function onSearchChange() {
       searchQ = document.getElementById('searchInput').value;
       searchZone = document.getElementById('searchZone').value;
-      const selFilter = document.getElementById('searchCommune');
+
+      // Commune
+      const selFilterComm = document.getElementById('searchCommune');
       if (searchZone === 'bx') {
-        searchCommune = selFilter.value || 'all';
+        searchCommune = selFilterComm.value || 'all';
       } else {
         searchCommune = 'all';
-        selFilter.value = 'all';
+        selFilterComm.value = 'all';
       }
+
+      // Ville
+      const selFilterCity = document.getElementById('searchCity');
+      if (searchZone === 'hors') {
+        searchCity = selFilterCity.value || 'all';
+      } else {
+        searchCity = 'all';
+        selFilterCity.value = 'all';
+      }
+
       localStorage.setItem(LS_KEYS.q, searchQ);
       localStorage.setItem(LS_KEYS.zone, searchZone);
       localStorage.setItem(LS_KEYS.commune, searchCommune);
+      localStorage.setItem(LS_KEYS.city, searchCity);
+
       updateCommuneFilterVisibility();
+      updateCityFilterVisibility();
       refresh();
     }
 
@@ -470,6 +549,34 @@
       const container = document.getElementById('filter-commune');
       const isBx = document.getElementById('searchZone').value === 'bx';
       container.style.display = isBx ? 'block' : 'none';
+    }
+
+    function updateCityFilterVisibility() {
+      const container = document.getElementById('filter-city');
+      const isHors = document.getElementById('searchZone').value === 'hors';
+      container.style.display = isHors ? 'block' : 'none';
+    }
+
+    function rebuildCityFilterOptions(preserve = true) {
+      const sel = document.getElementById('searchCity');
+      const prev = preserve ? (sel.value || searchCity) : 'all';
+      // Collecte villes uniques (hors Bruxelles)
+      const set = new Set();
+      database.forEach(i => {
+        if (!i.isBx && i.city && i.city.trim()) set.add(i.city.trim());
+      });
+      const cities = Array.from(set).sort((a, b) => normalizeLower(a).localeCompare(normalizeLower(b)));
+
+      // Reconstruit les options
+      const l = tr[lang];
+      sel.innerHTML = '';
+      sel.add(new Option(l.allCities, 'all'));
+      cities.forEach(c => sel.add(new Option(c, c)));
+
+      // Restaure sélection si possible
+      sel.value = cities.includes(prev) ? prev : 'all';
+      searchCity = sel.value;
+      localStorage.setItem(LS_KEYS.city, searchCity);
     }
 
     // ----------------------
@@ -531,6 +638,57 @@
       const bg = document.getElementById('bgColor').value || '#fdfafc';
       // On garde l'image actuelle (on ne la change pas ici)
       applyTheme(primary, bg, themeBgImg);
+    }
+
+    // ----------------------
+    // Sauvegarde auto (backup local avant fermeture)
+    // ----------------------
+    function autoBackup(reason = 'auto') {
+      const payload = {
+        version: 3,
+        ts: new Date().toISOString(),
+        reason,
+        theme: { primary: themePrimary, bg: themeBg, bgImg: themeBgImg },
+        items: database
+      };
+      saveStorage(LS_KEYS.backup, payload);
+      // Met à jour l'info si possible (ne s'affichera pas sur beforeunload, mais ok pour visibilitychange)
+      updateBackupInfo();
+    }
+
+    function updateBackupInfo() {
+      const infoEl = document.getElementById('lastBackupInfo');
+      const payload = loadStorage(LS_KEYS.backup, null);
+      if (!payload || !payload.ts) {
+        infoEl.textContent = tr[lang].noBackup;
+      } else {
+        infoEl.textContent = formatDateTime(payload.ts);
+      }
+    }
+
+    function restoreFromBackup() {
+      const l = tr[lang];
+      const payload = loadStorage(LS_KEYS.backup, null);
+      if (!payload || !Array.isArray(payload.items)) {
+        alert(l.noBackup);
+        return;
+      }
+      if (!confirm(l.restoreConfirm)) return;
+
+      // Thème (respecte l'option "préserver image")
+      const nextBgImg = preserveBg
+        ? themeBgImg
+        : (payload.theme && typeof payload.theme.bgImg === 'string' ? payload.theme.bgImg : themeBgImg);
+      const nextPrimary = (payload.theme && payload.theme.primary) || themePrimary;
+      const nextBg = (payload.theme && payload.theme.bg) || themeBg;
+      applyTheme(nextPrimary, nextBg, nextBgImg);
+
+      // Données
+      database = payload.items;
+      saveStorage(LS_KEYS.data, database);
+      rebuildCityFilterOptions(true);
+      refresh();
+      alert(l.restoredOk);
     }
 
     // ----------------------
@@ -603,9 +761,11 @@
               if (idx !== -1) { database[idx] = safe; } else { database.push(safe); }
             });
             saveStorage(LS_KEYS.data, database);
+            rebuildCityFilterOptions(true);
           }
 
           refresh();
+          autoBackup('post-import'); // on garde une trace
           alert(lang === 'fr' ? 'Import terminé.' : 'Import voltooid.');
         } catch (e) {
           console.error(e);
@@ -652,6 +812,7 @@
             ? themeBgImg
             : (typeof theme.bgImg === 'string' ? theme.bgImg : themeBgImg);
           applyTheme(theme.primary || themePrimary, theme.bg || themeBg, nextBgImg);
+          autoBackup('post-import-theme');
           alert(lang === 'fr' ? 'Présentation importée.' : 'Presentatie geïmporteerd.');
         } catch (e) {
           console.error(e);
@@ -665,7 +826,9 @@
       if (confirm(lang === 'fr' ? "Vider la base ? Cette action est irréversible." : "Basis wissen? Deze actie is onomkeerbaar.")) {
         database = [];
         saveStorage(LS_KEYS.data, database);
+        rebuildCityFilterOptions(true);
         refresh();
+        autoBackup('post-clear');
       }
     }
 
@@ -682,6 +845,7 @@
       const sName = normalizeLower(document.getElementById('searchInput').value);
       const sZone = document.getElementById('searchZone').value;
       const sCommune = document.getElementById('searchCommune').value || 'all';
+      const sCity = document.getElementById('searchCity').value || 'all';
       list.innerHTML = "";
 
       const filtered = database
@@ -689,7 +853,8 @@
           const mName = normalizeLower(i.name).includes(sName);
           const mZone = (sZone === 'tous') || (sZone === 'bx' && i.isBx) || (sZone === 'hors' && !i.isBx);
           const mCommune = (sZone !== 'bx') || (sCommune === 'all') || (i.isBx && normalizeLower(i.commune) === normalizeLower(sCommune));
-          return mName && mZone && mCommune;
+          const mCity = (sZone !== 'hors') || (sCity === 'all') || (!i.isBx && normalizeLower(i.city) === normalizeLower(sCity));
+          return mName && mZone && mCommune && mCity;
         })
         .sort((a, b) => normalizeLower(a.name).localeCompare(normalizeLower(b.name)));
 
@@ -767,8 +932,10 @@
       }
 
       saveStorage(LS_KEYS.data, database);
+      rebuildCityFilterOptions(true);
       resetForm();
       refresh();
+      autoBackup('post-save');
     }
 
     function loadEdit(id) {
@@ -805,7 +972,9 @@
       if (confirm(lang === 'fr' ? "Supprimer ?" : "Verwijderen?")) {
         database = database.filter(x => x.id !== id);
         saveStorage(LS_KEYS.data, database);
+        rebuildCityFilterOptions(true);
         refresh();
+        autoBackup('post-delete');
       }
     }
 
