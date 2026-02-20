@@ -113,6 +113,12 @@
           <input type="file" id="bgImage" accept="image/*" />
           <div class="preview" id="bgPreview"></div>
 
+          <!-- Nouvelle option : conserver l'image actuelle -->
+          <label class="note" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="chkPreserveBg" />
+            <span id="txtPreserveBg">Conserver l’image actuelle lors de l’application d’un thème/import</span>
+          </label>
+
           <div class="btn-row">
             <button class="btn" onclick="removeBgImage()" id="btnRemoveImg">Supprimer l’image</button>
             <button class="btn" onclick="resetTheme()" id="btnResetTheme">Réinitialiser le thème</button>
@@ -223,6 +229,7 @@
         removeImg: "Supprimer l’image",
         resetTheme: "Réinitialiser le thème",
         applyTheme: "Appliquer le thème",
+        preserveBg: "Conserver l’image actuelle lors de l’application d’un thème/import",
         storageNote: "⚠️ Les grandes images peuvent remplir rapidement le stockage local (~5 Mo de limite).",
         // Filtres
         communeLabel: "Commune",
@@ -260,6 +267,7 @@
         removeImg: "Afbeelding verwijderen",
         resetTheme: "Thema resetten",
         applyTheme: "Thema toepassen",
+        preserveBg: "Huidige achtergrondafbeelding behouden bij toepassen/importeren van thema",
         storageNote: "⚠️ Grote afbeeldingen kunnen de lokale opslag snel vullen (~5 MB-limiet).",
         // Filtres
         communeLabel: "Gemeente",
@@ -283,7 +291,8 @@
       commune: 'search_commune_v18',
       themePrimary: 'theme_primary_v18',
       themeBg: 'theme_bg_v18',
-      themeBgImg: 'theme_bgimg_v18'
+      themeBgImg: 'theme_bgimg_v18',
+      preserveBg: 'theme_preserve_bgimg_v18'
     };
 
     function loadStorage(key, fallback) {
@@ -321,6 +330,7 @@
     let themePrimary = JSON.parse(localStorage.getItem(LS_KEYS.themePrimary) || '"#800080"');
     let themeBg = JSON.parse(localStorage.getItem(LS_KEYS.themeBg) || '"#fdfafc"');
     let themeBgImg = JSON.parse(localStorage.getItem(LS_KEYS.themeBgImg) || '""');
+    let preserveBg = JSON.parse(localStorage.getItem(LS_KEYS.preserveBg) || 'true');
 
     // ----------------------
     // Cycle de vie
@@ -346,6 +356,16 @@
       applyTheme(themePrimary, themeBg, themeBgImg, false);
       // Sync inputs réglages
       syncThemeInputs();
+
+      // Init checkbox "préserver image"
+      const chk = document.getElementById('chkPreserveBg');
+      if (chk) {
+        chk.checked = preserveBg;
+        chk.addEventListener('change', () => {
+          preserveBg = !!chk.checked;
+          localStorage.setItem(LS_KEYS.preserveBg, JSON.stringify(preserveBg));
+        });
+      }
 
       toggleZone();
       applyLang();
@@ -410,6 +430,7 @@
       document.getElementById('btnResetTheme').innerText = l.resetTheme;
       document.getElementById('btnApplyTheme').innerText = l.applyTheme;
       document.getElementById('storageNote').innerText = l.storageNote;
+      document.getElementById('txtPreserveBg').innerText = l.preserveBg;
 
       // Filtres
       document.getElementById('labelSearchCommune').innerText = l.communeLabel;
@@ -508,6 +529,7 @@
     function applyThemeFromInputs() {
       const primary = document.getElementById('primaryColor').value || '#800080';
       const bg = document.getElementById('bgColor').value || '#fdfafc';
+      // On garde l'image actuelle (on ne la change pas ici)
       applyTheme(primary, bg, themeBgImg);
     }
 
@@ -548,7 +570,10 @@
           // 1) Appliquer thème si présent (optionnel)
           const theme = parsed.theme || null;
           if (theme && (theme.primary || theme.bg || typeof theme.bgImg !== 'undefined')) {
-            applyTheme(theme.primary || themePrimary, theme.bg || themeBg, typeof theme.bgImg === 'string' ? theme.bgImg : themeBgImg);
+            const nextBgImg = preserveBg
+              ? themeBgImg
+              : (typeof theme.bgImg === 'string' ? theme.bgImg : themeBgImg);
+            applyTheme(theme.primary || themePrimary, theme.bg || themeBg, nextBgImg);
           }
 
           // 2) Récupérer items si présents (rétro‑compatible)
@@ -623,7 +648,10 @@
           const parsed = JSON.parse(reader.result);
           const theme = parsed.theme || parsed; // accepte {theme:{...}} ou {...}
           if (!theme || (typeof theme !== 'object')) throw new Error('Fichier thème invalide');
-          applyTheme(theme.primary || themePrimary, theme.bg || themeBg, typeof theme.bgImg === 'string' ? theme.bgImg : themeBgImg);
+          const nextBgImg = preserveBg
+            ? themeBgImg
+            : (typeof theme.bgImg === 'string' ? theme.bgImg : themeBgImg);
+          applyTheme(theme.primary || themePrimary, theme.bg || themeBg, nextBgImg);
           alert(lang === 'fr' ? 'Présentation importée.' : 'Presentatie geïmporteerd.');
         } catch (e) {
           console.error(e);
@@ -679,7 +707,7 @@
         const typeLabel = tr[lang].types[typeKey];
         const typeEmoji = emojiForType(typeKey);
 
-        const mapsUrl = buildMapsUrl(i);
+        const url = buildMapsUrl(i);
 
         list.innerHTML += `
           <div class="result-item">
@@ -693,7 +721,7 @@
             </h3>
             <p>📍 ${i.addr}, ${lieu}</p>
             ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-maps">
+            <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-maps" title="${tr[lang].maps}">
               ${tr[lang].maps}
             </a>
           </div>`;
@@ -775,13 +803,7 @@
 
     function del(id) {
       if (confirm(lang === 'fr' ? "Supprimer ?" : "Verwijderen?")) {
-        database = database.filter(x => x.id !== id);
-        saveStorage(LS_KEYS.data, database);
-        refresh();
-      }
-    }
-
-    // start
+        database = database.filter(x => x.id start
     init();
   </script>
 </body>
