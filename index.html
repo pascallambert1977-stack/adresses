@@ -593,9 +593,18 @@
       }
 
       if (persist) {
-        localStorage.setItem(LS_KEYS.themePrimary, JSON.stringify(primary));
-        localStorage.setItem(LS_KEYS.themeBg, JSON.stringify(bg));
-        localStorage.setItem(LS_KEYS.themeBgImg, JSON.stringify(bgImg || ""));
+        try {
+          localStorage.setItem(LS_KEYS.themePrimary, JSON.stringify(primary));
+          localStorage.setItem(LS_KEYS.themeBg, JSON.stringify(bg));
+          localStorage.setItem(LS_KEYS.themeBgImg, JSON.stringify(bgImg || ""));
+        } catch (e) {
+          console.warn('Échec de persistance du thème (quota ?) :', e);
+          alert(
+            (lang === 'fr'
+              ? "L’image de fond est trop lourde pour être sauvegardée. Elle s’affichera jusqu’au prochain rechargement.\n\nAstuce : choisis une image plus légère (ex. JPEG ~200–400 Ko)."
+              : "De achtergrondafbeelding is te zwaar om op te slaan. Ze blijft zichtbaar tot de volgende herlaad.\n\nTip: kies een lichtere afbeelding (bv. JPEG ~200–400 KB).")
+          );
+        }
       }
 
       themePrimary = primary;
@@ -618,13 +627,53 @@
       prev.style.borderColor = themeBgImg ? '#aaa' : '#ccc';
     }
 
-    function onBgImageSelected(e) {
+    // --- PATCH: compression image avant sauvegarde ---
+    async function onBgImageSelected(e) {
       const file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => applyTheme(themePrimary, themeBg, reader.result);
-      reader.readAsDataURL(file);
+
+      try {
+        const dataUrl = await compressImageFile(file, {
+          maxWidth: 1920,
+          maxHeight: 1080,
+          quality: 0.85,
+          mime: 'image/jpeg'
+        });
+        applyTheme(themePrimary, themeBg, dataUrl);
+      } catch (err) {
+        console.error('Compression image échouée:', err);
+        // Fallback : tenter sans compression
+        const reader = new FileReader();
+        reader.onload = () => applyTheme(themePrimary, themeBg, reader.result);
+        reader.readAsDataURL(file);
+      }
     }
+
+    function compressImageFile(file, {maxWidth=1920, maxHeight=1080, quality=0.85, mime='image/jpeg'} = {}) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = () => {
+          img.onload = () => {
+            let { width, height } = img;
+            const ratio = Math.min(maxWidth / width, maxHeight / height, 1); // ne pas agrandir
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(width * ratio);
+            canvas.height = Math.round(height * ratio);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL(mime, quality);
+            resolve(dataUrl);
+          };
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    // --- FIN PATCH ---
+
     function removeBgImage() {
       document.getElementById('bgImage').value = "";
       applyTheme(themePrimary, themeBg, "");
