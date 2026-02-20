@@ -29,6 +29,7 @@
     .toolbar { display:flex; justify-content:flex-end; gap:8px; }
     .btn { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
     .btn.small { padding: 3px 8px; font-size: 0.9em; }
+    .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
 
@@ -43,7 +44,7 @@
     /* Bouton Maps */
     .btn-maps { display: inline-block; background: var(--primary); color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px; }
 
-    /* Formulaire */
+    /* Formulaire (modal) */
     label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
     input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
     .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
@@ -56,10 +57,42 @@
     .settings-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
     .row { display: grid; grid-template-columns: 1fr; gap: 8px; }
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
     .note { font-size: 0.85em; color: #666; }
     .preview { width: 100%; height: 120px; border-radius: 10px; border: 1px dashed #ccc; background-size: cover; background-position: center; }
     .danger { color: #b00020; }
+
+    /* Modal overlay */
+    .modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal.open { display: flex; }
+    .modal-card {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      position: relative;
+      padding: 20px;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .modal-title {
+      margin: 0; font-size: 1.2rem; color: var(--primary);
+    }
+    .modal-close {
+      background: transparent; border: none; font-size: 1.4rem; line-height: 1; cursor: pointer; color: #666;
+    }
+    .modal-actions {
+      display: flex; gap: 10px; margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -68,6 +101,7 @@
 
   <div class="container">
     <div class="toolbar">
+      <button class="btn primary small" id="btnOpenAdd" title="Ajouter" onclick="openModalForCreate()">➕ Ajouter</button>
       <button class="btn small" id="btnLang" title="Langue" onclick="switchLang()">🇳🇱 NL</button>
       <button class="btn small" id="btnSettings" title="Réglages" onclick="toggleSettings()">⚙️</button>
     </div>
@@ -113,7 +147,7 @@
           <input type="file" id="bgImage" accept="image/*" />
           <div class="preview" id="bgPreview"></div>
 
-          <!-- Option : conserver l'image actuelle lors d'un import/appli thème -->
+          <!-- Préserver image -->
           <label class="note" style="display:flex; align-items:center; gap:8px;">
             <input type="checkbox" id="chkPreserveBg" />
             <span id="txtPreserveBg">Conserver l’image actuelle lors de l’application d’un thème/import</span>
@@ -150,7 +184,7 @@
         <option value="hors">🚗 Hors Bruxelles</option>
       </select>
 
-      <!-- Filtre Commune (visible seulement quand Zone=Bruxelles) -->
+      <!-- Filtre Commune -->
       <div id="filter-commune" class="row" style="display:none; margin-top:10px;">
         <label for="searchCommune" id="labelSearchCommune">Commune</label>
         <select id="searchCommune" onchange="onSearchChange()" aria-label="Filtrer par commune">
@@ -158,7 +192,7 @@
         </select>
       </div>
 
-      <!-- Filtre Ville (visible seulement quand Zone=Hors Bruxelles) -->
+      <!-- Filtre Ville -->
       <div id="filter-city" class="row" style="display:none; margin-top:10px;">
         <label for="searchCity" id="labelSearchCity">Ville</label>
         <select id="searchCity" onchange="onSearchChange()" aria-label="Filtrer par ville">
@@ -170,41 +204,50 @@
     </div>
 
     <div id="results"></div>
+  </div>
 
-    <!-- Formulaire -->
-    <div class="card" id="formSection" style="border-top: 5px solid #FFD700;">
-      <h2 id="formTitle">➕ Ajouter</h2>
-      <input type="hidden" id="editId">
-
-      <label for="f-name">Nom :</label>
-      <input type="text" id="f-name" required>
-
-      <label for="f-type" id="labelType">Type d’établissement</label>
-      <select id="f-type" aria-label="Type d’établissement"></select>
-
-      <label for="f-isbx">Zone :</label>
-      <select id="f-isbx" onchange="toggleZone()" aria-label="Sélection de la zone">
-        <option value="oui">Bruxelles</option>
-        <option value="non">Hors Bruxelles</option>
-      </select>
-
-      <div id="box-bx">
-        <label for="f-commune">Commune :</label>
-        <select id="f-commune"></select>
+  <!-- MODAL: Formulaire Ajouter/Modifier -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="formTitle" class="modal-title">➕ Ajouter</h2>
+        <button class="modal-close" aria-label="Fermer" onclick="closeModal()">×</button>
       </div>
-      <div id="box-hors" style="display:none">
-        <label for="f-city">Ville :</label>
-        <input type="text" id="f-city" placeholder="Ville">
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+
+        <label for="f-name">Nom :</label>
+        <input type="text" id="f-name" required>
+
+        <label for="f-type" id="labelType">Type d’établissement</label>
+        <select id="f-type" aria-label="Type d’établissement"></select>
+
+        <label for="f-isbx">Zone :</label>
+        <select id="f-isbx" onchange="toggleZone()" aria-label="Sélection de la zone">
+          <option value="oui">Bruxelles</option>
+          <option value="non">Hors Bruxelles</option>
+        </select>
+
+        <div id="box-bx">
+          <label for="f-commune">Commune :</label>
+          <select id="f-commune"></select>
+        </div>
+        <div id="box-hors" style="display:none">
+          <label for="f-city">Ville :</label>
+          <input type="text" id="f-city" placeholder="Ville">
+        </div>
+
+        <label for="f-addr">Adresse :</label>
+        <input type="text" id="f-addr" required autocomplete="street-address" placeholder="Rue, numéro...">
+
+        <label for="f-comment" id="labelComment">Commentaire (une ligne)</label>
+        <input type="text" id="f-comment" placeholder="Ex.: entrée par l’arrière, sonnette, contact, …">
       </div>
 
-      <label for="f-addr">Adresse :</label>
-      <input type="text" id="f-addr" required autocomplete="street-address" placeholder="Rue, numéro...">
-
-      <label for="f-comment" id="labelComment">Commentaire (une ligne)</label>
-      <input type="text" id="f-comment" placeholder="Ex.: entrée par l’arrière, sonnette, contact, …">
-
-      <button class="btn-save" id="btnSubmit" onclick="save()" title="Enregistrer la fiche">Enregistrer</button>
-      <button id="btnCancel" onclick="resetForm()" style="display:none; width:100%; background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">Annuler</button>
+      <div class="modal-actions">
+        <button class="btn" id="btnCancel" onclick="onCancel()">Annuler</button>
+        <button class="btn primary" id="btnSubmit" onclick="save()" title="Enregistrer la fiche">Enregistrer</button>
+      </div>
     </div>
   </div>
 
@@ -428,7 +471,16 @@
         if (document.visibilityState === 'hidden') autoBackup('visibilitychange');
       });
 
+      // Image thème (compression)
       document.getElementById('bgImage').addEventListener('change', onBgImageSelected);
+
+      // Fermeture modal avec Échap & clic overlay
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+      document.getElementById('modal').addEventListener('click', (e) => {
+        if (e.target.id === 'modal') closeModal();
+      });
     }
 
     function switchLang() {
@@ -461,6 +513,7 @@
     function applyLang() {
       const l = tr[lang];
       document.getElementById('btnLang').innerText = (lang === 'fr') ? '🇳🇱 NL' : '🇫🇷 FR';
+      document.getElementById('btnOpenAdd').innerText = l.add;
       document.getElementById('appTitle').innerText = l.app;
       document.getElementById('searchTitle').innerText = l.search;
       document.getElementById('optAll').innerText = l.all;
@@ -627,7 +680,7 @@
       prev.style.borderColor = themeBgImg ? '#aaa' : '#ccc';
     }
 
-    // --- PATCH: compression image avant sauvegarde ---
+    // --- Compression image avant sauvegarde ---
     async function onBgImageSelected(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -672,7 +725,7 @@
         reader.readAsDataURL(file);
       });
     }
-    // --- FIN PATCH ---
+    // --- FIN compression ---
 
     function removeBgImage() {
       document.getElementById('bgImage').value = "";
@@ -701,7 +754,7 @@
         items: database
       };
       saveStorage(LS_KEYS.backup, payload);
-      // Met à jour l'info si possible (ne s'affichera pas sur beforeunload, mais ok pour visibilitychange)
+      // Met à jour l'info si possible
       updateBackupInfo();
     }
 
@@ -935,11 +988,32 @@
             </h3>
             <p>📍 ${i.addr}, ${lieu}</p>
             ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-maps">
+            ${url}
               ${tr[lang].maps}
             </a>
           </div>`;
       });
+    }
+
+    // ----------------------
+    // Modal controls
+    // ----------------------
+    function openModal() {
+      const m = document.getElementById('modal');
+      m.classList.add('open');
+      // focus premier champ
+      setTimeout(() => { document.getElementById('f-name').focus(); }, 50);
+    }
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
+    function openModalForCreate() {
+      resetForm(); // remet le mode "Ajouter"
+      openModal();
+    }
+    function onCancel() {
+      resetForm();
+      closeModal();
     }
 
     // ----------------------
@@ -983,6 +1057,7 @@
       saveStorage(LS_KEYS.data, database);
       rebuildCityFilterOptions(true);
       resetForm();
+      closeModal();
       refresh();
       autoBackup('post-save');
     }
@@ -1000,9 +1075,8 @@
       document.getElementById('f-addr').value = i.addr;
       document.getElementById('f-comment').value = (typeof i.comment === 'string') ? i.comment : (i.note || '');
       document.getElementById('formTitle').innerText = tr[lang].edit;
-      document.getElementById('btnCancel').style.display = 'block';
-      document.getElementById('formSection').scrollIntoView({behavior: 'smooth'});
-      applyLang();
+      document.getElementById('btnSubmit').innerText = tr[lang].update;
+      openModal();
     }
 
     function resetForm() {
@@ -1011,10 +1085,10 @@
       document.getElementById('f-addr').value = "";
       document.getElementById('f-comment').value = "";
       document.getElementById('f-type').value = 'autre';
+      // Zone : on ne force pas le select, mais on assure l'affichage cohérent
       toggleZone();
       document.getElementById('formTitle').innerText = tr[lang].add;
-      document.getElementById('btnCancel').style.display = 'none';
-      applyLang();
+      document.getElementById('btnSubmit').innerText = tr[lang].save;
     }
 
     function del(id) {
