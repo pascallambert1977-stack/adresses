@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lieu de contact - V18 Fixed</title>
+  <title>SIC ADVISOR</title>
   <style>
     :root { --primary: #800080; --bg: #fdfafc; }
     body {
@@ -105,7 +105,7 @@
       <button class="btn small" id="btnLang" title="Langue" onclick="switchLang()">🇳🇱 NL</button>
       <button class="btn small" id="btnSettings" title="Réglages" onclick="toggleSettings()">⚙️</button>
     </div>
-    <h1 id="appTitle">🔮 Lieu de contact</h1>
+    <h1 id="appTitle">SIC ADVISOR</h1>
 
     <!-- Réglages -->
     <div class="card settings-panel" id="settingsPanel" aria-hidden="true">
@@ -263,7 +263,7 @@
 
     const tr = {
       fr: {
-        app: "🔮 Lieu de contact",
+        app: "SIC ADVISOR",
         search: "🔍 Rechercher",
         all: "🌍 Toutes les zones",
         add: "➕ Ajouter",
@@ -310,7 +310,7 @@
         types: { cafe: "Café", hotel: "Hôtel", restaurant: "Restaurant", culture: "Culture", autre: "Autre" }
       },
       nl: {
-        app: "🔮 Contactplaats",
+        app: "SIC ADVISOR",
         search: "🔍 Zoeken",
         all: "🌍 Alle zones",
         add: "➕ Toevoegen",
@@ -988,7 +988,7 @@
             </h3>
             <p>📍 ${i.addr}, ${lieu}</p>
             ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            <a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-maps">
+            ${url}
               ${tr[lang].maps}
             </a>
           </div>`;
