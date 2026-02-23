@@ -5,125 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SIC ADVISOR</title>
 
-  <!-- Icônes / Manifest (optionnels mais recommandés) -->
+  <!-- (Facultatif) Favicons/manifest si tu as posé les fichiers. Sinon, tu peux supprimer ces 4 lignes. -->
   icons/apple-touch-icon.png?v=1
-  <meta name="apple-mobile-web-app-title" content="SIC ADVISOR" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
   icons/favicon-32x32.png?v=1
   icons/favicon-16x16.png?v=1
-  icons/favicon.ico?v=1
   site.webmanifest?v=1
-  <meta name="theme-color" content="#083D77" />
 
   <style>
-    :root {
-      --bg: #F2F4F7;         /* gris clair plein écran */
-      --ink: #0B132B;        /* encre */
-      --accent: #083D77;     /* bleu foncé: bordures */
-      --accent-weak: #E6EEF8;/* bleu très pâle pour hover */
-      --white: #FFFFFF;
-      --badge: #DDE8F6;
+    :root{
+      --bg:#F2F4F7;         /* gris clair plein écran */
+      --ink:#0B132B;        /* texte principal */
+      --accent:#083D77;     /* bleu foncé bordures/boutons */
+      --accent-weak:#E6EEF8;/* survol doux */
+      --white:#FFFFFF;
+      --badge:#DDE8F6;
     }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
-      color: var(--ink);
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--ink);
+      font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+      display:flex; flex-direction:column;
     }
 
     /* Barre supérieure */
-    .toolbar {
-      display: flex; gap: 8px; align-items: center; justify-content: flex-end;
-      padding: 14px 16px; background: var(--white);
-      border-bottom: 3px solid var(--accent);
+    .toolbar{
+      display:flex; gap:8px; align-items:center; justify-content:flex-end;
+      padding:14px 16px; background:var(--white);
+      border-bottom:3px solid var(--accent);
     }
-    .brand {
-      margin-right: auto; font-weight: 700; letter-spacing: .3px;
-      color: var(--accent);
+    .brand{ margin-right:auto; font-weight:700; letter-spacing:.3px; color:var(--accent); }
+    .btn{
+      border:2px solid var(--accent); color:var(--accent); background:var(--white);
+      padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600;
     }
-    .btn {
-      border: 2px solid var(--accent);
-      color: var(--accent);
-      background: var(--white);
-      padding: 8px 12px; border-radius: 10px; cursor: pointer;
-      font-weight: 600;
-    }
-    .btn:hover { background: var(--accent-weak); }
-    .btn.primary { background: var(--accent); color: var(--white); }
-    .btn.primary:hover { filter: brightness(0.95); }
-    .btn.small { padding: 6px 10px; }
+    .btn:hover{ background:var(--accent-weak); }
+    .btn.primary{ background:var(--accent); color:var(--white); }
+    .btn.primary:hover{ filter:brightness(.95); }
+    .btn.small{ padding:6px 10px; }
 
-    /* Contenu principal plein écran */
-    .content {
-      flex: 1;
-      display: grid; grid-template-columns: 1fr; gap: 16px;
-      padding: 16px; box-sizing: border-box;
-    }
+    /* Contenu */
+    .content{ flex:1; display:grid; grid-template-columns:1fr; gap:16px; padding:16px; box-sizing:border-box; }
 
     /* Carte de recherche */
-    .card {
-      background: var(--white);
-      border: 3px solid var(--accent);
-      border-radius: 16px;
-      padding: 16px;
+    .card{
+      background:var(--white); border:3px solid var(--accent); border-radius:16px; padding:16px;
     }
-    .card h3 { margin: 0 0 10px 0; color: var(--accent); }
-    label { display: block; margin-top: 12px; font-weight: 600; }
-    input, select {
-      width: 100%; box-sizing: border-box; margin-top: 6px;
-      padding: 10px; border-radius: 10px; border: 2px solid var(--accent);
-      background: #FAFBFD;
+    .card h3{ margin:0 0 10px 0; color:var(--accent); }
+    label{ display:block; margin-top:12px; font-weight:600; }
+    input,select{
+      width:100%; box-sizing:border-box; margin-top:6px; padding:10px;
+      border-radius:10px; border:2px solid var(--accent); background:#FAFBFD;
     }
 
     /* Résultats */
-    .results-meta { color: #475569; margin: 8px 0 16px; }
-    .empty { color: #6b7280; font-style: italic; padding: 12px; text-align: center; }
-    .result-item {
-      background: var(--white);
-      border: 3px solid var(--accent);
-      border-radius: 14px;
-      padding: 14px;
-      position: relative;
-      margin-bottom: 12px;
+    .results-meta{ color:#475569; margin:8px 0 16px; }
+    .empty{ color:#6b7280; font-style:italic; padding:12px; text-align:center; }
+    .result-item{
+      background:var(--white); border:3px solid var(--accent); border-radius:14px; padding:14px; position:relative; margin-bottom:12px;
     }
-    .actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; }
-    .btn-edit, .btn-del {
-      border: 2px solid var(--accent);
-      background: var(--white);
-      color: var(--accent);
-      padding: 4px 8px; border-radius: 8px; cursor: pointer; font-size: .85rem;
+    .actions{ position:absolute; top:12px; right:12px; display:flex; gap:8px; }
+    .btn-edit,.btn-del{
+      border:2px solid var(--accent); background:var(--white); color:var(--accent);
+      padding:4px 8px; border-radius:8px; cursor:pointer; font-size:.85rem;
     }
-    .btn-del { border-color: #b91c1c; color:#b91c1c; }
-    .badge {
-      background: var(--badge);
-      color: var(--accent);
-      padding: 2px 8px; border-radius: 999px; font-size: .75rem;
-      margin-left: 8px; font-weight: 700;
-      border: 2px solid var(--accent);
+    .btn-del{ border-color:#b91c1c; color:#b91c1c; }
+    .badge{
+      background:var(--badge); color:var(--accent); padding:2px 8px; border-radius:999px; font-size:.75rem;
+      margin-left:8px; font-weight:700; border:2px solid var(--accent);
     }
-    .btn-maps {
-      display: inline-block; margin-top: 8px;
-      background: var(--accent); color: var(--white); text-decoration: none;
-      padding: 8px 12px; border-radius: 10px; font-weight: 700;
-      border: 2px solid var(--accent);
+    .btn-maps{
+      display:inline-block; margin-top:8px; background:var(--accent); color:var(--white); text-decoration:none;
+      padding:8px 12px; border-radius:10px; font-weight:700; border:2px solid var(--accent);
     }
-    .btn-maps:hover { filter: brightness(0.95); }
+    .btn-maps:hover{ filter:brightness(.95); }
 
     /* Modal */
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 10; padding: 16px; }
-    .modal.open { display: flex; }
-    .modal-card {
-      width: 100%; max-width: 700px; background: var(--white);
-      border: 3px solid var(--accent); border-radius: 16px; padding: 16px;
-    }
-    .modal-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .modal-title { margin: 0; color: var(--accent); }
-    .modal-close { background: transparent; border: 0; font-size: 1.4rem; cursor: pointer; color: #64748b; }
+    .modal{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:10; padding:16px; }
+    .modal.open{ display:flex; }
+    .modal-card{ width:100%; max-width:700px; background:var(--white); border:3px solid var(--accent); border-radius:16px; padding:16px; }
+    .modal-row{ display:grid; grid-template-columns:1fr; gap:12px; }
+    .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+    .modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .modal-title{ margin:0; color:var(--accent); }
+    .modal-close{ background:transparent; border:0; font-size:1.4rem; cursor:pointer; color:#64748b; }
   </style>
 </head>
 <body>
@@ -271,14 +235,7 @@
       }
     };
 
-    const LS = {
-      lang: 'simple_lang',
-      data: 'simple_data',
-      q: 'simple_q',
-      zone: 'simple_zone',
-      commune: 'simple_commune',
-      city: 'simple_city'
-    };
+    const LS = { lang:'simple_lang', data:'simple_data', q:'simple_q', zone:'simple_zone', commune:'simple_commune', city:'simple_city' };
 
     // ---------- État ----------
     let lang = localStorage.getItem(LS.lang) || 'fr';
@@ -289,23 +246,22 @@
     let searchCity = localStorage.getItem(LS.city) || 'all';
 
     // ---------- Utils ----------
-    function normalizeLower(s){ return (s||'').normalize('NFD').replace(/\\p{Diacritic}/gu,'').toLowerCase().trim(); }
+    function normalizeLower(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
 
     function buildMapsUrl(item) {
       const lieu = item.isBx ? item.commune : item.city;
       const country = (lang === 'nl') ? 'België' : 'Belgique';
-      const q = `${item.name} ${item.addr}, ${lieu||''}, ${country}`.trim();
+      const q = `${item.name} ${item.addr}${lieu ? ', '+lieu : ''}, ${country}`.trim();
       const params = new URLSearchParams({ api:'1', query:q, hl:lang, gl:'BE' });
       return `https://www.google.com/maps/search/?${params.toString()}`;
     }
 
     function updateResultsMeta(n=0){ document.getElementById('resultsMeta').textContent = tr[lang].results(n); }
-
     function setText(id, text){ const el=document.getElementById(id); if(el) el.innerText=text; }
 
     // ---------- Init ----------
     function init(){
-      // i18n init
+      // i18n / textes
       document.getElementById('btnLang').innerText = (lang==='fr') ? '🇳🇱 NL' : '🇫🇷 FR';
       document.title = tr[lang].app;
       setText('searchTitle', tr[lang].search);
@@ -320,7 +276,7 @@
       document.getElementById('searchInput').value = searchQ;
       document.getElementById('searchZone').value = searchZone;
 
-      // Remplir communes (form + filtre)
+      // Form & filtre communes
       const selFormComm = document.getElementById('f-commune');
       selFormComm.innerHTML = '';
       communes.forEach(c => selFormComm.add(new Option(c, c)));
@@ -331,25 +287,21 @@
       communes.forEach(c => selFilterComm.add(new Option(c, c)));
       selFilterComm.value = searchCommune;
 
-      // Remplir villes (filtre) d'après la base
+      // Villes (filtre) d’après la base
       rebuildCityFilterOptions(true);
 
-      // Afficher filtres selon zone
+      // Affichages conditionnels
       updateCommuneCityVisibility();
 
       // Rendu
       refresh();
 
-      // Échap / clic overlay pour fermer la modale
+      // Fermeture modale : Esc / clic overlay
       document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
       document.getElementById('modal').addEventListener('click',(e)=>{ if(e.target.id==='modal') closeModal(); });
     }
 
-    function switchLang(){
-      lang = (lang==='fr') ? 'nl' : 'fr';
-      localStorage.setItem(LS.lang, lang);
-      init();
-    }
+    function switchLang(){ lang = (lang==='fr') ? 'nl' : 'fr'; localStorage.setItem(LS.lang, lang); init(); }
 
     // ---------- Filtres ----------
     function onSearchChange(){
@@ -358,19 +310,13 @@
 
       // commune
       const selFilterComm = document.getElementById('searchCommune');
-      if (searchZone === 'bx') {
-        searchCommune = selFilterComm.value || 'all';
-      } else {
-        searchCommune = 'all'; selFilterComm.value = 'all';
-      }
+      if (searchZone === 'bx') { searchCommune = selFilterComm.value || 'all'; }
+      else { searchCommune = 'all'; selFilterComm.value = 'all'; }
 
       // ville
       const selFilterCity = document.getElementById('searchCity');
-      if (searchZone === 'hors') {
-        searchCity = selFilterCity.value || 'all';
-      } else {
-        searchCity = 'all'; selFilterCity.value = 'all';
-      }
+      if (searchZone === 'hors') { searchCity = selFilterCity.value || 'all'; }
+      else { searchCity = 'all'; selFilterCity.value = 'all'; }
 
       localStorage.setItem(LS.q, searchQ);
       localStorage.setItem(LS.zone, searchZone);
@@ -454,17 +400,14 @@
       document.getElementById('box-bx').style.display = isBx ? 'block' : 'none';
       document.getElementById('box-hors').style.display = isBx ? 'none' : 'block';
     }
-
     function openModal(){ document.getElementById('modal').classList.add('open'); setTimeout(()=>document.getElementById('f-name').focus(),50); }
     function closeModal(){ document.getElementById('modal').classList.remove('open'); }
-
     function openModalForCreate(){
       resetForm();
       document.getElementById('formTitle').innerText = tr[lang].add;
       document.getElementById('btnSubmit').innerText = tr[lang].save;
       openModal();
     }
-
     function loadEdit(id){
       const i = database.find(x=>x.id===id);
       if(!i) return;
@@ -480,7 +423,6 @@
       document.getElementById('btnSubmit').innerText = tr[lang].update;
       openModal();
     }
-
     function resetForm(){
       document.getElementById('editId').value = '';
       document.getElementById('f-name').value = '';
@@ -491,7 +433,6 @@
       document.getElementById('f-addr').value = '';
       document.getElementById('f-comment').value = '';
     }
-
     function save(){
       const id = document.getElementById('editId').value;
       const name = document.getElementById('f-name').value.trim();
@@ -501,26 +442,20 @@
       const city = document.getElementById('f-city').value.trim();
       const comment = document.getElementById('f-comment').value.trim();
 
-      if(!name || !addr){
-        alert(lang==='fr' ? 'Nom et Adresse obligatoires' : 'Naam en adres zijn verplicht');
-        return;
-      }
+      if(!name || !addr){ alert(lang==='fr'?'Nom et Adresse obligatoires':'Naam en adres zijn verplicht'); return; }
 
-      const obj = {
-        id: id ? parseInt(id) : Date.now(),
-        name, addr, isBx, commune, city, comment
-      };
+      const obj = { id: id ? parseInt(id) : Date.now(), name, addr, isBx, commune, city, comment };
 
-      // Doublons sur triplet clé
+      // Doublon = même Nom + Adresse + Lieu
       const key = `${normalizeLower(name)}|${normalizeLower(addr)}|${normalizeLower(isBx ? commune : city)}`;
       const idx = database.findIndex(x => `${normalizeLower(x.name)}|${normalizeLower(x.addr)}|${normalizeLower(x.isBx ? x.commune : x.city)}` === key);
 
       if(id){
         const i = database.findIndex(x=>x.id===parseInt(id));
-        if(i!==-1) database[i]=obj;
-      } else if(idx!==-1){
-        obj.id = database[idx].id; database[idx]=obj;
-      } else {
+        if(i!==-1) database[i] = obj;
+      }else if(idx!==-1){
+        obj.id = database[idx].id; database[idx] = obj;
+      }else{
         database.push(obj);
       }
 
@@ -529,9 +464,8 @@
       closeModal();
       refresh();
     }
-
     function del(id){
-      if(!confirm(lang==='fr' ? 'Supprimer ?' : 'Verwijderen?')) return;
+      if(!confirm(lang==='fr'?'Supprimer ?':'Verwijderen?')) return;
       database = database.filter(x=>x.id!==id);
       localStorage.setItem(LS.data, JSON.stringify(database));
       rebuildCityFilterOptions(true);
@@ -545,7 +479,6 @@
       inp.onchange = ()=> doImport(inp.files[0]);
       inp.click();
     }
-
     function doImport(file){
       if(!file) return;
       const reader = new FileReader();
@@ -579,15 +512,9 @@
       };
       reader.readAsText(file,'utf-8');
     }
-
     function exportAddresses(){
-      // on exporte seulement les champs d’adresse pertinents (léger)
-      const items = database.map(x=>({
-        id: x.id, name: x.name, addr: x.addr,
-        isBx: !!x.isBx, commune: x.commune || '', city: x.city || '',
-        comment: x.comment || ''
-      }));
-      const payload = { version: 1, items };
+      const items = database.map(x=>({ id:x.id, name:x.name, addr:x.addr, isBx:!!x.isBx, commune:x.commune||'', city:x.city||'', comment:x.comment||'' }));
+      const payload = { version:1, items };
       const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -598,10 +525,7 @@
     }
 
     // ---------- Start ----------
-    window.addEventListener('DOMContentLoaded', ()=>{
-      // remplir communes du filtre et du form
-      init();
-    });
+    window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
