@@ -1,28 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIC ADVISOR</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
-</head>
-<body>
-    <header>
-        <h1>Welcome to SIC ADVISOR</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Find your SIC Code</h2>
-            <p>Using our application, you can look up your SIC code here.</p>
-            <div id="map"></div>
-        </section>
-    </main>
-    <footer>
-        <p>© 2026 SIC ADVISOR All rights reserved.</p>
-    </footer>
-</body>
-</html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -66,8 +42,7 @@
     .badge { background: #f3e5f5; color: var(--primary); padding: 3px 8px; border-radius: 5px; font-size: 0.7em; font-weight: bold; text-transform: uppercase; margin-left: 8px; }
 
     /* Bouton Maps */
-    .btn-maps { display: inline-block; background: var(--primary); color: white; text-align: center; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
-    .btn-maps:hover { opacity: 0.9; }
+    .btn-maps { display: inline-block; background: var(--primary); color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px; }
 
     /* Formulaire (modal) */
     label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
@@ -121,7 +96,7 @@
   </style>
 </head>
 <body>
-  <!-- Calque d'arrière-plan -->
+  <!-- Calque d’arrière-plan -->
   <div id="bgLayer" class="bg-layer"></div>
 
   <div class="container">
@@ -175,16 +150,16 @@
           <!-- Préserver image -->
           <label class="note" style="display:flex; align-items:center; gap:8px;">
             <input type="checkbox" id="chkPreserveBg" />
-            <span id="txtPreserveBg">Conserver l'image actuelle lors de l'application d'un thème/import</span>
+            <span id="txtPreserveBg">Conserver l’image actuelle lors de l’application d’un thème/import</span>
           </label>
 
           <div class="btn-row">
-            <button class="btn" onclick="removeBgImage()" id="btnRemoveImg">Supprimer l'image</button>
+            <button class="btn" onclick="removeBgImage()" id="btnRemoveImg">Supprimer l’image</button>
             <button class="btn" onclick="resetTheme()" id="btnResetTheme">Réinitialiser le thème</button>
             <button class="btn primary" onclick="applyThemeFromInputs()" id="btnApplyTheme">Appliquer le thème</button>
           </div>
           <div class="note" id="storageNote">
-            ⚠️ Les grandes images peuvent remplir rapidement le stockage local (~5 Mo de limite).
+            ⚠️ Les grandes images peuvent remplir rapidement le stockage local (~5 Mo de limite).
           </div>
         </div>
 
@@ -244,8 +219,8 @@
         <label for="f-name">Nom :</label>
         <input type="text" id="f-name" required>
 
-        <label for="f-type" id="labelType">Type d'établissement</label>
-        <select id="f-type" aria-label="Type d'établissement"></select>
+        <label for="f-type" id="labelType">Type d’établissement</label>
+        <select id="f-type" aria-label="Type d’établissement"></select>
 
         <label for="f-isbx">Zone :</label>
         <select id="f-isbx" onchange="toggleZone()" aria-label="Sélection de la zone">
@@ -266,7 +241,7 @@
         <input type="text" id="f-addr" required autocomplete="street-address" placeholder="Rue, numéro...">
 
         <label for="f-comment" id="labelComment">Commentaire (une ligne)</label>
-        <input type="text" id="f-comment" placeholder="Ex.: entrée par l'arrière, sonnette, contact, …">
+        <input type="text" id="f-comment" placeholder="Ex.: entrée par l’arrière, sonnette, contact, …">
       </div>
 
       <div class="modal-actions">
@@ -311,11 +286,11 @@
         primaryColor: "Couleur principale",
         bgColor: "Couleur de fond",
         bgImage: "Image de fond (optionnel)",
-        removeImg: "Supprimer l'image",
+        removeImg: "Supprimer l’image",
         resetTheme: "Réinitialiser le thème",
         applyTheme: "Appliquer le thème",
-        preserveBg: "Conserver l'image actuelle lors de l'application d'un thème/import",
-        storageNote: "⚠️ Les grandes images peuvent remplir rapidement le stockage local (~5 Mo de limite).",
+        preserveBg: "Conserver l’image actuelle lors de l’application d’un thème/import",
+        storageNote: "⚠️ Les grandes images peuvent remplir rapidement le stockage local (~5 Mo de limite).",
         // Auto-backup
         autoBackupTitle: "Sauvegarde auto",
         lastBackupLabel: "Dernière auto‑sauvegarde :",
@@ -329,7 +304,7 @@
         cityLabel: "Ville",
         allCities: "Toutes les villes",
         // Form
-        typeLabel: "Type d'établissement",
+        typeLabel: "Type d’établissement",
         commentLabel: "Commentaire (une ligne)",
         // Types (affichage)
         types: { cafe: "Café", hotel: "Hôtel", restaurant: "Restaurant", culture: "Culture", autre: "Autre" }
@@ -679,8 +654,8 @@
           console.warn('Échec de persistance du thème (quota ?) :', e);
           alert(
             (lang === 'fr'
-              ? "L'image de fond est trop lourde pour être sauvegardée. Elle s'affichera jusqu'au prochain rechargement.\n\nAstuce : choisis une image plus légère (ex. JPEG ~200–400 Ko)."
-              : "De achtergrondafbeelding is te zwaar om op te slaan. Ze blijft zichtbaar tot de volgende herlaad.\n\nTip: kies een lichtere afbeelding (bv. JPEG ~200–400 KB).")
+              ? "L’image de fond est trop lourde pour être sauvegardée. Elle s’affichera jusqu’au prochain rechargement.\n\nAstuce : choisis une image plus légère (ex. JPEG ~200–400 Ko)."
+              : "De achtergrondafbeelding is te zwaar om op te slaan. Ze blijft zichtbaar tot de volgende herlaad.\n\nTip: kies een lichtere afbeelding (bv. JPEG ~200–400 KB).")
           );
         }
       }
@@ -896,7 +871,7 @@
           alert(lang === 'fr' ? 'Import terminé.' : 'Import voltooid.');
         } catch (e) {
           console.error(e);
-          alert((lang === 'fr' ? 'Erreur d'import : ' : 'Importfout: ') + e.message);
+          alert((lang === 'fr' ? 'Erreur d’import : ' : 'Importfout: ') + e.message);
         }
       };
       reader.readAsText(file, 'utf-8');
@@ -943,7 +918,7 @@
           alert(lang === 'fr' ? 'Présentation importée.' : 'Presentatie geïmporteerd.');
         } catch (e) {
           console.error(e);
-          alert((lang === 'fr' ? 'Erreur d'import de présentation : ' : 'Fout bij import van presentatie: ') + e.message);
+          alert((lang === 'fr' ? 'Erreur d’import de présentation : ' : 'Fout bij import van presentatie: ') + e.message);
         }
       };
       reader.readAsText(file, 'utf-8');
@@ -993,30 +968,31 @@
       }
 
       filtered.forEach(i => {
-        const lieu = i.isBx ? i.commune : i.city;
-        const comment = (typeof i.comment === 'string') ? i.comment : (i.note || '');
-        const typeKey = TYPE_KEYS.includes(i.type) ? i.type : 'autre';
-        const typeLabel = tr[lang].types[typeKey];
-        const typeEmoji = emojiForType(typeKey);
+        -            ${url}
+-              ${tr[lang].maps}
+-            </a>
++            <a class="btn-maps" href="${url}" target="_blank" rel="noopener">
++              ${tr[lang].maps}
++            </a>
 
         const url = buildMapsUrl(i);
 
         list.innerHTML += `
-        <div class="result-item">
-    <div class="actions">
-      <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
-      <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
-    </div>
-    <h3>
-      ${i.name}
-      <span class="badge">${typeEmoji} ${typeLabel}</span>
-    </h3>
-    <p>📍 ${i.addr}, ${lieu}</p>
-    ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-    <a href="${url}" target="_blank" class="btn-maps">
-      ${tr[lang].maps}
-    </a>
-  </div>`;
+          <div class="result-item">
+            <div class="actions">
+              <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
+              <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
+            </div>
+            <h3>
+              ${i.name}
+              <span class="badge">${typeEmoji} ${typeLabel}</span>
+            </h3>
+            <p>📍 ${i.addr}, ${lieu}</p>
+            ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
+            ${url}
+              ${tr[lang].maps}
+            </a>
+          </div>`;
       });
     }
 
@@ -1110,7 +1086,7 @@
       document.getElementById('f-addr').value = "";
       document.getElementById('f-comment').value = "";
       document.getElementById('f-type').value = 'autre';
-      // Zone : ne change pas la valeur du select, mais rafraîchit l'affichage
+      // Zone : ne change pas la valeur du select, mais rafraîchit l’affichage
       toggleZone();
       document.getElementById('formTitle').innerText = tr[lang].add;
       document.getElementById('btnSubmit').innerText = tr[lang].save;
@@ -1131,5 +1107,3 @@
   </script>
 </body>
 </html>
-
-
