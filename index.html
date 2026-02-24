@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+NE CHANGE RIEN AU CODE mais règle juste les problèmes google maps : <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -967,13 +967,13 @@
         return;
       }
 
+      ...
       filtered.forEach(i => {
-        -            ${url}
--              ${tr[lang].maps}
--            </a>
-+            <a class="btn-maps" href="${url}" target="_blank" rel="noopener">
-+              ${tr[lang].maps}
-+            </a>
+        const lieu = i.isBx ? i.commune : i.city;
+        const comment = (typeof i.comment === 'string') ? i.comment : (i.note || '');
+        const typeKey = TYPE_KEYS.includes(i.type) ? i.type : 'autre';
+        const typeLabel = tr[lang].types[typeKey];
+        const typeEmoji = emojiForType(typeKey);
 
         const url = buildMapsUrl(i);
 
@@ -983,18 +983,21 @@
               <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
               <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
             </div>
+
             <h3>
               ${i.name}
               <span class="badge">${typeEmoji} ${typeLabel}</span>
             </h3>
+
             <p>📍 ${i.addr}, ${lieu}</p>
             ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            ${url}
+
+            <a class="btn-maps" href="${url}" target="_blank" rel="noopener">
               ${tr[lang].maps}
             </a>
           </div>`;
       });
-    }
+...
 
     // ----------------------
     // Modal controls
