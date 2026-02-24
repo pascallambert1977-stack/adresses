@@ -1,4 +1,4 @@
-NE CHANGE RIEN AU CODE mais règle juste les problèmes google maps : <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -967,7 +967,6 @@ NE CHANGE RIEN AU CODE mais règle juste les problèmes google maps : <!DOCTYPE 
         return;
       }
 
-      ...
       filtered.forEach(i => {
         const lieu = i.isBx ? i.commune : i.city;
         const comment = (typeof i.comment === 'string') ? i.comment : (i.note || '');
@@ -983,21 +982,18 @@ NE CHANGE RIEN AU CODE mais règle juste les problèmes google maps : <!DOCTYPE 
               <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
               <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
             </div>
-
             <h3>
               ${i.name}
               <span class="badge">${typeEmoji} ${typeLabel}</span>
             </h3>
-
             <p>📍 ${i.addr}, ${lieu}</p>
             ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-
-            <a class="btn-maps" href="${url}" target="_blank" rel="noopener">
+            ${url}
               ${tr[lang].maps}
             </a>
           </div>`;
       });
-...
+    }
 
     // ----------------------
     // Modal controls
