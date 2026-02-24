@@ -943,57 +943,83 @@
     }
 
     function refresh() {
-      const list = document.getElementById('results');
-      const sName = normalizeLower(document.getElementById('searchInput').value);
-      const sZone = document.getElementById('searchZone').value;
-      const sCommune = document.getElementById('searchCommune').value || 'all';
-      const sCity = document.getElementById('searchCity').value || 'all';
-      list.innerHTML = "";
+  const list = document.getElementById('results');
+  const sName = normalizeLower(document.getElementById('searchInput').value);
+  const sZone = document.getElementById('searchZone').value;
+  const sCommune = (document.getElementById('searchCommune').value || 'all').toLowerCase();
+  const sCity = (document.getElementById('searchCity').value || 'all').toLowerCase();
 
-      const filtered = database
-        .filter(i => {
-          const mName = normalizeLower(i.name).includes(sName);
-          const mZone = (sZone === 'tous') || (sZone === 'bx' && i.isBx) || (sZone === 'hors' && !i.isBx);
-          const mCommune = (sZone !== 'bx') || (sCommune === 'all') || (i.isBx && normalizeLower(i.commune) === normalizeLower(sCommune));
-          const mCity = (sZone !== 'hors') || (sCity === 'all') || (!i.isBx && normalizeLower(i.city) === normalizeLower(sCity));
-          return mName && mZone && mCommune && mCity;
-        })
-        .sort((a, b) => normalizeLower(a.name).localeCompare(normalizeLower(b.name)));
+  list.innerHTML = "";
 
-      updateResultsMeta(filtered.length);
+  const filtered = database
+    .filter(i => {
+      const nameMatch = normalizeLower(i.name).includes(sName);
 
-      if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty">${tr[lang].results(0)}</div>`;
-        return;
-      }
+      // Zone (tous / bx / hors)
+      const zoneMatch =
+        sZone === 'tous' ||
+        (sZone === 'bx' && i.isBx) ||
+        (sZone === 'hors' && !i.isBx);
 
-      filtered.forEach(i => {
-        const lieu = i.isBx ? i.commune : i.city;
-        const comment = (typeof i.comment === 'string') ? i.comment : (i.note || '');
-        const typeKey = TYPE_KEYS.includes(i.type) ? i.type : 'autre';
-        const typeLabel = tr[lang].types[typeKey];
-        const typeEmoji = emojiForType(typeKey);
+      // Commune (uniquement si zone = bx)
+      const communeMatch =
+        sZone !== 'bx' ||
+        sCommune === 'all' ||
+        (i.isBx && normalizeLower(i.commune) === sCommune);
 
-        const url = buildMapsUrl(i);
+      // City (uniquement si zone = hors)
+      const cityMatch =
+        sZone !== 'hors' ||
+        sCity === 'all' ||
+        (!i.isBx && normalizeLower(i.city) === sCity);
 
-        list.innerHTML += `
-          <div class="result-item">
-            <div class="actions">
-              <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
-              <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
-            </div>
-            <h3>
-              ${i.name}
-              <span class="badge">${typeEmoji} ${typeLabel}</span>
-            </h3>
-            <p>📍 ${i.addr}, ${lieu}</p>
-            ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            ${url}
-              ${tr[lang].maps}
-            </a>
-          </div>`;
-      });
-    }
+      return nameMatch && zoneMatch && communeMatch && cityMatch;
+    })
+    .sort((a, b) =>
+      normalizeLower(a.name).localeCompare(normalizeLower(b.name))
+    );
+
+  updateResultsMeta(filtered.length);
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty">${tr[lang].results(0)}</div>`;
+    return;
+  }
+
+  filtered.forEach(i => {
+    const lieu = i.isBx ? i.commune : i.city;
+    const comment = (typeof i.comment === 'string') ? i.comment : (i.note || '');
+    const typeKey = TYPE_KEYS.includes(i.type) ? i.type : 'autre';
+    const typeLabel = tr[lang].types[typeKey];
+    const typeEmoji = emojiForType(typeKey);
+
+    const mapsUrl = buildMapsUrl(i);
+
+    const html = `
+      <div class="result-item">
+        <div class="actions">
+          <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
+          <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
+        </div>
+
+        <h3>
+          ${i.name}
+          <span class="badge">${typeEmoji} ${typeLabel}</span>
+        </h3>
+
+        <p>📍 ${i.addr}, ${lieu}</p>
+
+        ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
+
+        <a href="${mapsUrl}" target="_blank" class="map-link">
+          ${tr[lang].maps}
+        </a>
+      </div>
+    `;
+
+    list.insertAdjacentHTML('beforeend', html);
+  });
+}
 
     // ----------------------
     // Modal controls
@@ -1106,3 +1132,4 @@
   </script>
 </body>
 </html>
+
