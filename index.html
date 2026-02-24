@@ -978,21 +978,21 @@
         const url = buildMapsUrl(i);
 
         list.innerHTML += `
-          <div class="result-item">
-            <div class="actions">
-              <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
-              <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
-            </div>
-            <h3>
-              ${i.name}
-              <span class="badge">${typeEmoji} ${typeLabel}</span>
-            </h3>
-            <p>📍 ${i.addr}, ${lieu}</p>
-            ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
-            <a href="${url}" target="_blank" class="btn-maps">
-              ${tr[lang].maps}
-            </a>
-          </div>`;
+        <div class="result-item">
+    <div class="actions">
+      <button class="btn-edit" onclick="loadEdit(${i.id})" title="Modifier">${tr[lang].edit}</button>
+      <button class="btn-del" onclick="del(${i.id})" title="Supprimer">X</button>
+    </div>
+    <h3>
+      ${i.name}
+      <span class="badge">${typeEmoji} ${typeLabel}</span>
+    </h3>
+    <p>📍 ${i.addr}, ${lieu}</p>
+    ${comment ? `<p style="font-style:italic; color:gray;">💬 ${comment}</p>` : ''}
+    <a href="${url}" target="_blank" class="btn-maps">
+      ${tr[lang].maps}
+    </a>
+  </div>`;
       });
     }
 
@@ -1107,3 +1107,4 @@
   </script>
 </body>
 </html>
+
